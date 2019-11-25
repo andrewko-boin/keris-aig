@@ -20,7 +20,7 @@ metadata:
   labels:
     commit: ${WERCKER_GIT_COMMIT}
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: keris-aig-backend

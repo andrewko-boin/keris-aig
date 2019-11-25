@@ -29,7 +29,7 @@ keris-aig-backend-push:
         tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT-keris-aig-backend
         working-dir: /pipeline/source/keris-aig-backend
         ports: 8080
-        cmd: java -jar target/keris-aig-backend.jar
+        cmd: java -jar target/keris-aig-backend-1.0.jar
 
 keris-aig-frontend-push:
   steps:

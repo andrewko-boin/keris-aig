@@ -1,0 +1,94 @@
+#Use OpenJDK base docker image from dockerhub and open the application port on the docker container
+box:
+  id: openjdk:8-jdk
+#  id: jimador/docker-jdk-8-maven-node
+ports:
+  - 8080
+ 
+#Build our application using Maven, just as we always have
+build:
+  steps:
+    - script:
+        name: pwd
+        code: pwd
+    - install-packages:
+        packages: maven
+    - script:
+        name: maven keris-aig-backend build
+        cwd: keris-aig-backend
+        code: mvn clean package
+
+#Push the docker image with our built and tested application to the Oracle Container Registry
+keris-aig-backend-push:
+  steps:
+    - internal/docker-push:
+        username: $DOCKER_USERNAME
+        password: $OCI_AUTH_TOKEN
+        repository: $DOCKER_REGISTRY/$DOCKER_REPO
+        registry: https://$DOCKER_REGISTRY/v2
+        tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT-keris-aig-backend
+        working-dir: /pipeline/source/keris-aig-backend
+        ports: 8080
+        cmd: java -jar target/keris-aig-backend.jar
+
+keris-aig-frontend-push:
+  steps:
+    - script:
+        name: pwd
+        code: pwd
+    - internal/docker-build:
+        context: keris-aig-frontend
+        dockerfile: Dockerfile 
+        image-name: keris-aig-frontend
+    - internal/docker-push:
+        image-name: keris-aig-frontend
+        username: $DOCKER_USERNAME
+        password: $OCI_AUTH_TOKEN
+        repository: $DOCKER_REGISTRY/$DOCKER_REPO
+        registry: https://$DOCKER_REGISTRY/v2
+        tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT-keris-aig-frontend
+
+#Deploy our container from the Oracle Container Registry to the Oracle Container Engine (Kubernetes)
+deploy-to-cluster:
+  box:
+    id: alpine
+    cmd: /bin/sh
+
+  steps:
+    - bash-template
+
+    - kubectl:
+        name: delete secret
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_AUTH_TOKEN
+        insecure-skip-tls-verify: true
+        command: delete secret wercker --namespace=${KUBERNETES_NAMESPACE}; echo delete registry secret
+
+    - kubectl:
+        name: create secret
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_AUTH_TOKEN
+        insecure-skip-tls-verify: true
+        command: create secret docker-registry wercker --docker-server=$DOCKER_REGISTRY --docker-email=nobody@oracle.com --docker-username=$DOCKER_USERNAME --docker-password='$OCI_AUTH_TOKEN' --namespace=${KUBERNETES_NAMESPACE}; echo delete registry secret
+
+    - script:
+        name: "Visualise Kubernetes config"
+        code: cat kube-keris-aig-backend-config.yml
+
+    - kubectl:
+        name: deploy springboot-movie-people-api to kubernetes
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_AUTH_TOKEN
+        insecure-skip-tls-verify: true
+        command: apply -f kube-springboot-movie-people-api-config.yml
+
+    - script:
+        name: "Visualise Kubernetes config"
+        code: cat kube-jet-movie-msa-ui-config.yml
+
+    - kubectl:
+        name: deploy jet-movie-msa-ui to kubernetes
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_AUTH_TOKEN
+        insecure-skip-tls-verify: true
+        command: apply -f kube-jet-movie-msa-ui-config.yml

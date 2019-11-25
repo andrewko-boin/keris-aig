@@ -53,7 +53,7 @@ export default {
     return {
       e1: "Select",
       search: "",
-      selectedObj: 1,
+      selectedObj: null,
       selgradeunit: [],
       learning_objectives: [],
       gradeunits: []

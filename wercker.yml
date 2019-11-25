@@ -76,19 +76,19 @@ deploy-to-cluster:
         code: cat kube-keris-aig-backend-config.yml
 
     - kubectl:
-        name: deploy springboot-movie-people-api to kubernetes
+        name: deploy keris-aig-backend service to kubernetes
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_AUTH_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f kube-springboot-movie-people-api-config.yml
+        command: apply -f kube-keris-aig-backend-config.yml
 
     - script:
         name: "Visualise Kubernetes config"
-        code: cat kube-jet-movie-msa-ui-config.yml
+        code: cat kube-keris-aig-frontend-config.yml
 
     - kubectl:
-        name: deploy jet-movie-msa-ui to kubernetes
+        name: deploy kube-keris-aig-frontend ui to kubernetes
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_AUTH_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f kube-jet-movie-msa-ui-config.yml
+        command: apply -f kube-keris-aig-frontend-config.yml

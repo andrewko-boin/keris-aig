@@ -38,7 +38,7 @@ keris-aig-frontend-push:
         code: pwd
     - internal/docker-build:
         context: keris-aig-frontend
-        dockerfile: Dockerfile 
+        dockerfile: Dockerfile
         image-name: keris-aig-frontend
     - internal/docker-push:
         image-name: keris-aig-frontend

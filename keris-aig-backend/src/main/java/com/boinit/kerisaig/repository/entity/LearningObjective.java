@@ -25,6 +25,9 @@ public class LearningObjective implements Serializable {
     @Column(name = "OBJECTIVE")
     private String objective;
 
+    @Column(name = "LESSON")
+    private String lesson;
+
     public int getLbno() {
         return lbno;
     }
@@ -47,6 +50,14 @@ public class LearningObjective implements Serializable {
 
     public void setObjective(String objective) {
         this.objective = objective;
+    }
+
+    public String getLesson() {
+        return lesson;
+    }
+
+    public void setLesson(String lesson) {
+        this.lesson = lesson;
     }
 
 }

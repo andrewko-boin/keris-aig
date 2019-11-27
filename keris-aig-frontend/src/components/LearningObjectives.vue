@@ -16,14 +16,14 @@
     <v-list shaped dense height="278" style="overflow-y:auto">
       <v-list-item-group v-model="selectedObj" active-class="primary--text">
         <template v-if="learning_objectives.length">
-          <template v-for="(obj, index) in learning_objectives">
-            <v-list-item :key="obj.lbno" @click="searchQuestionPreviewList(obj.lbno)">
+          <template v-for="(objective, index) in learning_objectives">
+            <v-list-item :key="objective.lbno" @click="searchQuestionPreviewList(objective)">
               <template v-slot:default="{ active, toggle }">
                 <v-list-item-content style="max-width:50px">
-                  <v-list-item-title v-text="obj.lbno"></v-list-item-title>
+                  <v-list-item-title v-text="objective.lbno"></v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-content>
-                  <v-list-item-title v-text="obj.objective"></v-list-item-title>
+                  <v-list-item-title v-text="objective.objective"></v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action style="max-width:50px">
                   <!-- list에서 로우 클릭 시 체크박스가 체크되려면 v-model을 반드시 active로 해줘야 한다.-->
@@ -31,7 +31,7 @@
                 </v-list-item-action>
               </template>
             </v-list-item>
-            <v-divider v-if="index + 1 < obj.length" :key="index"></v-divider>
+            <v-divider v-if="index + 1 < objective.length" :key="index"></v-divider>
           </template>
         </template>
         <template v-else>
@@ -98,11 +98,11 @@ export default {
           });
       }
     },
-    searchQuestionPreviewList(lbno) {
+    searchQuestionPreviewList(objective) {
       /* eslint-disable no-console */
-      console.log(this.selectedObj);
+      //console.log(this.selectedObj);
 
-      this.$EventBus.$emit("queryQuestionPreviewList", lbno);
+      this.$EventBus.$emit("queryQuestionPreviewList", objective);
     }
   },
   computed: {

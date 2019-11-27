@@ -5,6 +5,7 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import axios from 'axios'
 import base64 from 'base64-utf8'
+import forAsync from 'for-async';
 
 axios.defaults.baseURL = 'http://140.238.20.135:8000'
 axios.defaults.headers.post["Content-Type"] = "application/json";
@@ -26,12 +27,20 @@ const generation = axios.create({
   }
 });
 
+const iscream = axios.create({
+  baseURL: 'http://cms.aimath.home-learn.com',
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+});
+
 const local = axios.create({
   baseURL: ''
 });
 
 Vue.prototype.$detection = detection;
 Vue.prototype.$generation = generation;
+Vue.prototype.$iscream = iscream;
 Vue.prototype.$local = local;
 
 Vue.config.productionTip = false
@@ -39,8 +48,7 @@ Vue.config.productionTip = false
 Vue.prototype.$EventBus = new Vue();
 Vue.prototype.$axios = axios;
 Vue.prototype.$base64 = base64;
-
-
+Vue.prototype.$forAsync = forAsync;
 
 new Vue({
   router,

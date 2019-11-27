@@ -20,7 +20,7 @@
       <!-- Generated Questions-->
       <v-col xs="12" sm="12" md="12" lg="12" xl="12">
         <v-card outlined tile>
-          <Questions />
+          <GeneratedQuestions />
         </v-card>
       </v-col>
     </v-row>
@@ -31,8 +31,7 @@
 import LearningObjectives from "../components/LearningObjectives";
 import QuestionPreviewList from "../components/QuestionPreviewList";
 import QuestionPreview from "../components/QuestionPreview";
-import Questions from "../components/Questions";
-import ListTest from "../components/ListTest";
+import GeneratedQuestions from "../components/GeneratedQuestions";
 
 export default {
   name: "home",
@@ -41,8 +40,7 @@ export default {
     LearningObjectives,
     QuestionPreviewList,
     QuestionPreview,
-    Questions,
-    ListTest
+    GeneratedQuestions
   },
 
   data: () => ({

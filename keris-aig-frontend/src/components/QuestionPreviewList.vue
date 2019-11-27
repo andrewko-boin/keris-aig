@@ -27,7 +27,7 @@
     </v-card-title>
     <v-list dense height="265" style="overflow-y:auto">
       <template v-if="prevQuestions.length">
-        <v-list-item-group multiple v-model="selectQ" active-class="primary--text">
+        <v-list-item-group multiple v-model="selectQs" active-class="primary--text">
           <template v-for="(q, index) in prevQuestions">
             <v-list-item :key="q.qsno" :value="q" @click="findQuestionPriview(q)">
               <template v-slot:default="{ active, toggle }">
@@ -100,24 +100,28 @@
 export default {
   data() {
     return {
+      objective: null,
       selcount: 0,
       qcount: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      selectQ: [],
+      selectQs: [],
       loading: false,
-      detection: [],
-      generation: [],
-      prevQuestions: []
+      generationQs: [],
+      prevQuestions: [],
+      hmlList: [],
+      generatedh: []
     };
   },
+
   created() {
     this.$EventBus.$on(
       "queryQuestionPreviewList",
-      function(lbno) {
+      function(objective) {
         /* eslint-disable no-console */
         // console.log("queryQuestionPreviewList:" + lbno);
 
+        this.objective = objective;
         this.$axios
-          .get("/api/v1/kerisaig/query/question/" + lbno)
+          .get("/api/v1/kerisaig/query/question/" + objective.lbno)
           .then(response => {
             /* eslint-disable no-console */
             //console.log(response.data.content);
@@ -140,8 +144,7 @@ export default {
       // console.log(q.listhtml);
       // console.log(q.answerhtml);
       // console.log(q.bodyexthtml);
-
-      this.$EventBus.$emit("setQuestionPreview", q);
+      //this.$EventBus.$emit("setQuestionPreview", q);
     },
     setPrevQuestion(ref, q) {
       /* eslint-disable no-console */
@@ -173,75 +176,193 @@ export default {
 
       //this.$refs[ref + q.qsno].contentWindow.postMessage(q.bodyhtml, "*");
     },
-    detectAndGenQuestion() {
+    async detectAndGenQuestion() {
       /* eslint-disable no-console */
       //console.log(this.prevq.qsno);
-
-      //console.log(this.selectQ);
+      var _this = this;
 
       if (this.selcount == 0) {
         alert("count = 0");
         return;
       }
 
-      // 여러개의 문항에 대해서 호출해야 하므로, 이 로직은 나중에 활성화 한다.
-      //if (this.selectQ.length > 0) {
-      //for (var i = 0; i < this.selectQ.length; i++) {
-      // for test
-      var formBody = this.createReqDetectQSampleFormBody();
-      // real..
-      //var formBody = this.createReqDetectQFormBody(this.selectQ[i]);
-
+      this.generationQs.length = 0; //generationQ init
       this.loading = true; //로딩 시작
 
-      // 문항 디텍트
-      this.$detection({
-        method: "post",
-        url: "/cms.iscream.cceapi.com/cms_api/model_information/",
-        data: formBody,
-        headers: { "Content-Type": "multipart/form-data" }
-      })
-        .then(result => {
-          this.detection = result.data;
+      if (this.selectQs.length == 0) {
+        alert("this.selectQs.length == 0");
+        this.loading = false; //로딩 종료
+        return;
+      } else {
+        for (var i = 0; i < this.selectQs.length; i++) {
+          //if (this.selectQs.length - 1 == i) isLast = true;
+          await this.detectQuestion(this.selectQs[i], i) // 순차로 처리하기 위해서 async와 await을 사용함.
+            .then(detectionQ => {
+              return detectionQ;
+            })
+            .then(this.genQuestion);
+        }
+      }
 
-          // 문항 생성
-          this.genQuestion();
-          this.loading = false; // 로딩 종료
-          //생성 완료 팝업 필요
-          alert(this.selcount + "개 문항 생성 완료.");
-          console.log(result.data);
-        })
-        .catch(result => {
-          //handle error
-          this.loading = false;
-          console.log(result.data);
-        });
+      if (this.generationQs.length == 0) {
+        alert("this.generationQs.length == 0");
+        this.loading = false; //로딩 종료
+        return;
+      } else {
+        for (var i = 0; i < this.generationQs.length; i++) {
+          if (this.generationQs[i].generationHml.hml_list.length == 0) {
+            alert("this.generationQs[i].generationHml.hml_list.length == 0");
+            this.loading = false; //로딩 종료
+            return;
+          } else {
+            for (
+              var h = 0;
+              h < this.generationQs[i].generationHml.hml_list.length;
+              h++
+            ) {
+              //if (this.selectQs.length - 1 == i) isLast = true;
+              await this.generationQwithHtml(
+                this.generationQs[i].generationHml.hml_list[h].hml
+              ).then(function(html) {
+                _this.generationQs[i].generationHtml.html_list.push(html);
+              });
+            }
+          }
+        }
+      }
+
+      this.displayGenerationQs(); //생성 문항 목록으로 전달
+      this.loading = false; //로딩 종료
+      //console.log(JSON.stringify(this.generationQs));
+
+      // _this.detections.length = 0; //init array
+      // //check this.detection.length
+      // if (_this.selectQs.length == 0) {
+      //   alert("selectQ count = 0");
+      //   return;
+      // }
+      // if (_this.selectQs.length > 0) {
+      //   for (var i = 0; i < _this.selectQs.length; i++) {
+
+      // generation까지 호출 완료, 이후 진행........
+      // this.loading = true; //로딩 시작
+
+      // this.detectQuestions().then(function() {
+      //   console.log("start generatin question...");
+      //   //_this.genQuestions();
+      // });
+
+      // this.loading = false; // 로딩 종료
     },
-    genQuestion() {
+    detectQuestion(selectQ, idx) {
+      //console.log("detectQuestion-" + idx);
+      var _this = this;
+
+      return new Promise((resolve, reject) => {
+        // for test
+        var formBody = _this.createReqDetectQSampleFormBody();
+        // real..
+        //var formBody = this.createReqDetectQFormBody(this.selectQs[i]);
+        // 문항 디텍트
+        _this
+          .$detection({
+            method: "post",
+            url: "/cms.iscream.cceapi.com/cms_api/model_information/",
+            data: formBody,
+            headers: { "Content-Type": "multipart/form-data" }
+          })
+          .then(result => {
+            resolve({
+              selectQ: selectQ,
+              detectionModel: result.data,
+              idx: idx
+            });
+          })
+          .catch(error => {
+            //handle error
+            reject(error);
+            console.log(error);
+          });
+      });
+    },
+    genQuestion(detectionQ) {
+      //console.log("genQuestion-" + detectionQ.idx);
+      var _this = this;
       /* eslint-disable no-console */
-      console.log(this.selectQ);
 
-      //if (this.selectQ.length > 0) {
-      //for (var i = 0; i < this.selectQ.length; i++) {
       // for test
-      var formBody = this.createReqGenerateQSampleFormBody();
+      var formBody = this.createReqGenerateQSampleFormBody(detectionQ);
       // real..
-      //var formBody = this.createReqDetectQFormBody(this.selectQ[i]);
+      //var formBody = this.createReqDetectQFormBody(this.generations[i]);
+      return new Promise((resolve, reject) => {
+        _this
+          .$generation({
+            method: "post",
+            url: "/cms.iscream.cceapi.com/cms_api/create_question/",
+            data: formBody,
+            headers: { "Content-Type": "multipart/form-data" }
+          })
+          .then(result => {
+            this.generationQs.push({
+              objective: _this.objective,
+              generationHml: result.data,
+              generationHtml: { html_list: [] },
+              idx: detectionQ.idx
+            }); // html 결과만 제외하고 모두 담는다.
 
-      this.$generation({
-        method: "post",
-        url: "/cms.iscream.cceapi.com/cms_api/create_question/",
-        data: formBody,
-        headers: { "Content-Type": "multipart/form-data" }
-      })
-        .then(result => {
-          this.generation = result.data;
-          console.log(result.data);
+            resolve({
+              objective: _this.objective,
+              generationHml: result.data,
+              generationHtml: { html_list: [] },
+              idx: detectionQ.idx
+            });
+            //console.log(_this.generations);
+
+            //this.$EventBus.$emit("generationQuestions", _this.generations);
+          })
+          .catch(error => {
+            //handle error
+            reject(error);
+            console.log(error);
+          });
+      });
+    },
+    generationQwithHtml(hml) {
+      //console.log("generationQwithHtml-" + generationQ.idx);
+      var _this = this;
+
+      //console.log(this.generationQs);
+      return new Promise((resolve, reject) => {
+        var blob = this.dataURItoBlob(
+          "data:binary;charset=UTF-8;base64," + hml
+        );
+
+        let form = new FormData();
+        form.append("file", blob, "hml.hml");
+
+        this.$iscream({
+          method: "post",
+          url: "/cms_api/questions_preview",
+          data: form,
+          headers: { "Content-Type": "multipart/form-data" }
         })
-        .catch(function(response) {
-          //handle error
-          console.log(response);
-        });
+          .then(result => {
+            //console.log(this.generationQs);
+
+            // this.generationQs[generationQ.idx].generationHtml.html_list.push(
+            //   result.data
+            // );
+
+            resolve(result.data);
+          })
+          .catch(function(response) {
+            //handle error
+            console.log(response);
+          });
+      });
+    },
+    displayGenerationQs() {
+      this.$EventBus.$emit("generatedQuestions", this.generationQs);
     },
     createReqDetectQFormBody(selectQ) {
       let form = new FormData();
@@ -399,7 +520,82 @@ export default {
 
       return form;
     },
-    createReqGenerateQSampleFormBody() {
+    createReqGenerateQSampleFormBody(detectionQ) {
+      let form = new FormData();
+
+      form.append("request_count", this.selcount);
+      form.append("service_id", "");
+      form.append("etc_service_id", "");
+      form.append("category1", "");
+      form.append("category2", "");
+      form.append("category3", "");
+      form.append("category4", "");
+      form.append("category5", "");
+      form.append("chapter_code", detectionQ.selectQ.chapterCode);
+      form.append("etc_category1", detectionQ.selectQ.etcCategory1);
+      form.append("etc_category2", detectionQ.selectQ.etcCategory2);
+      form.append("etc_category3", detectionQ.selectQ.etcCategory3);
+      form.append("etc_category4", detectionQ.selectQ.etcCategory4);
+      form.append("etc_category5", detectionQ.selectQ.etcCategory5);
+      form.append("etc_chapter_code", "");
+      form.append("question_id", detectionQ.selectQ.qsno);
+      form.append("subject_cd", "");
+      form.append("subject_cd_value", "");
+      form.append("body_title_html", "");
+      form.append("body_html", "");
+      form.append("body_ex_html", "");
+      form.append("list_html", "");
+      form.append("answer_html", "");
+      form.append("explanation_html", "");
+      form.append("hint_html", "");
+      form.append("help1_html", "");
+      form.append("help2_html", "");
+      form.append("help3_html", "");
+      form.append("help4_html", "");
+      form.append("help5_html", "");
+      form.append("question_group_id", "");
+      form.append("sentence_html", "");
+      form.append("sub_sentence_id", "");
+      form.append("sub_sentence_html", "");
+      form.append("small_group_id", "");
+      form.append("small_group_html", "");
+      form.append("analysis_id", "");
+      form.append("analysis_name", "이해력");
+      form.append("studytree_id", "");
+      form.append("studytree_name", "수와 연산");
+      form.append("question_type_cd", "");
+      form.append("question_type_cd_value", "");
+      form.append("f_choice_shape_cd", "");
+      form.append("f_choice_shape_cd_value", "");
+      form.append("f_test_yn", "");
+      form.append("f_usage_cd", "");
+      form.append("f_usage_cd_value", "");
+      form.append("difficulty_cd", "");
+      form.append("difficulty_cd_value", detectionQ.selectQ.defficulty);
+      form.append("f_weight_yn", "");
+      form.append("f_book_cd", "");
+      form.append("f_book_cd_value", "");
+      form.append("f_etc10_cd", "");
+      form.append("f_etc10_cd_value", "");
+      form.append("point", "");
+      form.append("cc_answer", "");
+      form.append("cc_legend", "");
+      form.append("concept_ids", "");
+      form.append("inspection_mode_cd", "");
+      form.append("inspection_mode_cd_value", "");
+      form.append("f_book_desc", "");
+      form.append("f_listen", "");
+      form.append("f_keyword", "");
+      form.append("f_etc_txt01", "");
+      form.append("f_etc_txt02", "");
+      form.append("f_etc_txt03", "");
+      form.append("f_etc_txt04", "");
+      form.append("f_etc_txt05", "");
+      form.append("model", JSON.stringify(detectionQ.detectionModel));
+
+      return form;
+    },
+    createReqGenerateQFormBody(detection) {
       let form = new FormData();
 
       form.append("request_count", this.selcount);
@@ -417,7 +613,7 @@ export default {
       form.append("etc_category4", "소수와 합성수");
       form.append("etc_category5", "");
       form.append("etc_chapter_code", "");
-      form.append("question_id", "76032");
+      form.append("question_id", detection.selectQ.qsno);
       form.append("subject_cd", "");
       form.append("subject_cd_value", "");
       form.append("body_title_html", "");
@@ -470,12 +666,34 @@ export default {
       form.append("f_etc_txt03", "");
       form.append("f_etc_txt04", "");
       form.append("f_etc_txt05", "");
-      form.append("model", JSON.stringify(this.detection));
+      form.append("model", JSON.stringify(detection.detectionModel));
 
       return form;
     },
-    createReqGenerateQFormBody(count, selectQ) {
-      // 구현해야 함.
+    dataURItoBlob(dataURI) {
+      // convert base64/URLEncoded data component to raw binary data held in a string
+      var byteString;
+
+      if (dataURI.split(",")[0].indexOf("base64") >= 0)
+        byteString = atob(dataURI.split(",")[1]);
+      else byteString = unescape(dataURI.split(",")[1]);
+
+      // separate out the mime component
+      var mimeString = dataURI
+        .split(",")[0]
+        .split(":")[1]
+        .split(";")[0];
+
+      // write the bytes of the string to a typed array
+      var ia = new Uint8Array(byteString.length);
+
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      return new Blob([ia], {
+        type: mimeString
+      });
     }
   }
 };

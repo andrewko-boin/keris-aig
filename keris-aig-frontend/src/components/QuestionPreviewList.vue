@@ -29,7 +29,7 @@
       <template v-if="prevQuestions.length">
         <v-list-item-group multiple v-model="selectQs" active-class="primary--text">
           <template v-for="(q, index) in prevQuestions">
-            <v-list-item :key="q.qsno" :value="q" @click="findQuestionPriview(q)">
+            <v-list-item :key="q.qsno" :value="q">
               <template v-slot:default="{ active, toggle }">
                 <v-list-item-content style="max-width:50px">
                   <v-list-item-title v-text="index+1"></v-list-item-title>
@@ -137,15 +137,6 @@ export default {
     );
   },
   methods: {
-    findQuestionPriview(q) {
-      /* eslint-disable no-console */
-      // console.log(q.lbno);
-      // console.log(q.bodyhtml);
-      // console.log(q.listhtml);
-      // console.log(q.answerhtml);
-      // console.log(q.bodyexthtml);
-      //this.$EventBus.$emit("setQuestionPreview", q);
-    },
     setPrevQuestion(ref, q) {
       /* eslint-disable no-console */
       //console.log(this.$refs[ref + "-" + q.qsno]);
@@ -182,16 +173,24 @@ export default {
       var _this = this;
 
       if (this.selcount == 0) {
-        alert("count = 0");
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "문항당 생성개수를 선택해주세요!"
+        );
         return;
       }
 
       this.generationQs.length = 0; //generationQ init
-      this.loading = true; //로딩 시작
+      this.loading = true; //버튼 로딩 시작
+      this.$EventBus.$emit("popProgressBarToHome", "문항 생성중...", true); // 프로그래스바 시작
 
       if (this.selectQs.length == 0) {
-        alert("this.selectQs.length == 0");
-        this.loading = false; //로딩 종료
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "문항을 선택해주세요! (다수 선택 가능)"
+        );
+        this.loading = false; //버튼 로딩 종료
+        this.$EventBus.$emit("popProgressBarToHome", "", false); // 프로그래스바 종료
         return;
       } else {
         for (var i = 0; i < this.selectQs.length; i++) {
@@ -205,26 +204,34 @@ export default {
       }
 
       if (this.generationQs.length == 0) {
-        alert("this.generationQs.length == 0");
-        this.loading = false; //로딩 종료
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "생성된 문항이 없습니다. 관리자에게 문의하세요!"
+        );
+        this.loading = false; //버튼 로딩 종료
+        this.$EventBus.$emit("popProgressBarToHome", "", false); // 프로그래스바 종료
         return;
       } else {
-        for (var i = 0; i < this.generationQs.length; i++) {
-          if (this.generationQs[i].generationHml.hml_list.length == 0) {
-            alert("this.generationQs[i].generationHml.hml_list.length == 0");
-            this.loading = false; //로딩 종료
+        for (var j = 0; j < this.generationQs.length; j++) {
+          if (this.generationQs[j].generationHml.hml_list.length == 0) {
+            this.$EventBus.$emit(
+              "popAlertMessageToHome",
+              "생성된 hml이 없습니다. 관리자에게 문의하세요!"
+            );
+            this.loading = false; //버튼 로딩 종료
+            this.$EventBus.$emit("popProgressBarToHome", "", false); // 프로그래스바 종료
             return;
           } else {
             for (
               var h = 0;
-              h < this.generationQs[i].generationHml.hml_list.length;
+              h < this.generationQs[j].generationHml.hml_list.length;
               h++
             ) {
               //if (this.selectQs.length - 1 == i) isLast = true;
               await this.generationQwithHtml(
-                this.generationQs[i].generationHml.hml_list[h].hml
+                this.generationQs[j].generationHml.hml_list[h].hml
               ).then(function(html) {
-                _this.generationQs[i].generationHtml.html_list.push(html);
+                _this.generationQs[j].generationHtml.html_list.push(html);
               });
             }
           }
@@ -232,7 +239,8 @@ export default {
       }
 
       this.displayGenerationQs(); //생성 문항 목록으로 전달
-      this.loading = false; //로딩 종료
+      this.loading = false; //버튼 로딩 종료
+      this.$EventBus.$emit("popProgressBarToHome", "", false); // 프로그래스바 종료
       //console.log(JSON.stringify(this.generationQs));
 
       // _this.detections.length = 0; //init array
@@ -340,12 +348,13 @@ export default {
         let form = new FormData();
         form.append("file", blob, "hml.hml");
 
-        this.$iscream({
-          method: "post",
-          url: "/cms_api/questions_preview",
-          data: form,
-          headers: { "Content-Type": "multipart/form-data" }
-        })
+        _this
+          .$iscream({
+            method: "post",
+            url: "/cms_api/questions_preview",
+            data: form,
+            headers: { "Content-Type": "multipart/form-data" }
+          })
           .then(result => {
             //console.log(this.generationQs);
 

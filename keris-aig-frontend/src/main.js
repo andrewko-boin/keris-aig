@@ -5,7 +5,6 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import axios from 'axios'
 import base64 from 'base64-utf8'
-import forAsync from 'for-async';
 
 axios.defaults.baseURL = 'http://140.238.20.135:8000'
 axios.defaults.headers.post["Content-Type"] = "application/json";
@@ -48,7 +47,6 @@ Vue.config.productionTip = false
 Vue.prototype.$EventBus = new Vue();
 Vue.prototype.$axios = axios;
 Vue.prototype.$base64 = base64;
-Vue.prototype.$forAsync = forAsync;
 
 new Vue({
   router,

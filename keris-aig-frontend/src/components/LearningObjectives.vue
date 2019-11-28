@@ -47,16 +47,16 @@
     </v-list>
   </v-card>
 </template>
+
 <script>
 export default {
   data() {
     return {
-      e1: "Select",
       search: "",
       selectedObj: null,
       selgradeunit: [],
       learning_objectives: [],
-      gradeunits: []
+      gradeunits: ["선택"]
     };
   },
   created() {
@@ -86,8 +86,12 @@ export default {
     searchGradeUnits() {
       /* eslint-disable no-console */
       //console.log(this.selgradeunit);
-
-      if (this.selgradeunit !== "") {
+      if (this.selgradeunit == "" || this.selgradeunit == "선택") {
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "학년/학기/차시 선택을 한 후 돋보기 버튼을 클릭하여 검색하세요!"
+        );
+      } else {
         this.$axios
           .get("/api/v1/kerisaig/query/learningobjective/" + this.selgradeunit)
           .then(response => {

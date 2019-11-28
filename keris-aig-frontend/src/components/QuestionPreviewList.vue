@@ -25,14 +25,14 @@
         </template>
       </v-btn>
     </v-card-title>
-    <v-list dense height="265" style="overflow-y:auto">
+    <v-list dense height="337" style="overflow-y:auto">
       <template v-if="prevQuestions.length">
         <v-list-item-group multiple v-model="selectQs" active-class="primary--text">
           <template v-for="(q, index) in prevQuestions">
-            <v-list-item :key="q.qsno" :value="q">
+            <v-list-item :key="q.content.qsno" :value="q">
               <template v-slot:default="{ active, toggle }">
                 <v-list-item-content style="max-width:50px">
-                  <v-list-item-title v-text="index+1"></v-list-item-title>
+                  <v-list-item-title v-text="q.content.lbno +'-' +q.content.qsno"></v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-content>
                   <v-row>
@@ -45,12 +45,12 @@
                           </v-list-item-content>
                         </v-list-item>
                         <iframe
-                          v-bind:id="'bodyhtml' + q.qsno"
+                          v-bind:id="'bodyhtml' + q.content.qsno"
                           src="../../question_view.html"
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setPrevQuestion('bodyhtml', q)"
+                          @load="setPrevQuestion('bodyhtml', q.content)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -63,12 +63,12 @@
                           </v-list-item-content>
                         </v-list-item>
                         <iframe
-                          v-bind:id="'listhtml' + q.qsno"
+                          v-bind:id="'listhtml' + q.content.qsno"
                           src="../../question_view.html"
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setPrevQuestion('listhtml', q)"
+                          @load="setPrevQuestion('listhtml', q.content)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -100,10 +100,10 @@
 export default {
   data() {
     return {
-      objective: null,
       selcount: 0,
       qcount: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       selectQs: [],
+      objective: null,
       loading: false,
       generationQs: [],
       prevQuestions: [],
@@ -115,28 +115,47 @@ export default {
   created() {
     this.$EventBus.$on(
       "queryQuestionPreviewList",
-      function(objective) {
+      function(objectives) {
         /* eslint-disable no-console */
-        // console.log("queryQuestionPreviewList:" + lbno);
+        //console.log("objectives.length:" + objectives.length);
 
-        this.objective = objective;
-        this.$axios
-          .get("/api/v1/kerisaig/query/question/" + objective.lbno)
-          .then(response => {
-            /* eslint-disable no-console */
-            //console.log(response.data.content);
+        //this.objectives = objectives;
+        if (this.prevQuestions.length > 0) this.prevQuestions = []; // 모든 미리보기 항목을 초기화 한다.
+        if (this.selectQs.length > 0) this.selectQs = []; // 모든 선택 항목을 초기화 한다.
 
-            this.prevQuestions = response.data.content;
-
-            /* eslint-disable no-console */
-            // console.log(
-            //   "question_preview_list: " + this.prevQuestions.length
-            // );
-          });
+        if (objectives.length > 0) {
+          // for loop를 밖으로 뺀다. axios를 for로 감싸니 objective를 제대로 할당 못한다 (비동기 때문인듯)
+          for (var i = 0; i < objectives.length; i++) {
+            this.queryQuestions(objectives[i]);
+          }
+        }
       }.bind(this) // EventBus에서는 Event 안에 this는 자신이 된다. 따라서 바인딩할때 이와 같이 처리해줘야 한다.
     );
   },
   methods: {
+    queryQuestions(objective) {
+      this.$axios
+        .get("/api/v1/kerisaig/query/question/" + objective.lbno)
+        .then(response => {
+          /* eslint-disable no-console */
+          //console.log(response.data.content.length);
+
+          if (response.data.content.length > 0) {
+            for (var j = 0; j < response.data.content.length; j++) {
+              //console.log(response.data.content[j]);
+
+              this.prevQuestions.push({
+                objective: objective,
+                content: response.data.content[j]
+              });
+            }
+          }
+          /* eslint-disable no-console */
+          // console.log(
+          //   "question_preview_list: " + this.prevQuestions.length
+          // );
+        });
+    },
     setPrevQuestion(ref, q) {
       /* eslint-disable no-console */
       //console.log(this.$refs[ref + "-" + q.qsno]);
@@ -159,7 +178,7 @@ export default {
             .getElementById(ref + q.qsno)
             .contentWindow.setHtml(q.listhtml);
         //this.$refs[ref + q.qsno].contentWindow.setHtml(q.bodyhtml);
-      }, 100);
+      }, 50);
 
       // if (iframe) {
       //   console.log(this.$refs[ref + q.qsno].contentWindow);
@@ -184,6 +203,7 @@ export default {
       this.loading = true; //버튼 로딩 시작
       this.$EventBus.$emit("popProgressBarToHome", "문항 생성중...", true); // 프로그래스바 시작
 
+      //console.log(this.selectQs);
       if (this.selectQs.length == 0) {
         this.$EventBus.$emit(
           "popAlertMessageToHome",
@@ -195,7 +215,7 @@ export default {
       } else {
         for (var i = 0; i < this.selectQs.length; i++) {
           //if (this.selectQs.length - 1 == i) isLast = true;
-          await this.detectQuestion(this.selectQs[i], i) // 순차로 처리하기 위해서 async와 await을 사용함.
+          await this.detectQuestion(this.selectQs[i]) // 순차로 처리하기 위해서 async와 await을 사용함.
             .then(detectionQ => {
               return detectionQ;
             })
@@ -262,7 +282,7 @@ export default {
 
       // this.loading = false; // 로딩 종료
     },
-    detectQuestion(selectQ, idx) {
+    detectQuestion(selectQ) {
       //console.log("detectQuestion-" + idx);
       var _this = this;
 
@@ -270,8 +290,9 @@ export default {
         // for test
         var formBody = _this.createReqDetectQSampleFormBody();
         // real..
-        //var formBody = this.createReqDetectQFormBody(this.selectQs[i]);
+        //var formBody = this.createReqDetectQFormBody(selectQ);
         // 문항 디텍트
+
         _this
           .$detection({
             method: "post",
@@ -282,8 +303,7 @@ export default {
           .then(result => {
             resolve({
               selectQ: selectQ,
-              detectionModel: result.data,
-              idx: idx
+              detectionModel: result.data
             });
           })
           .catch(error => {
@@ -294,14 +314,13 @@ export default {
       });
     },
     genQuestion(detectionQ) {
-      //console.log("genQuestion-" + detectionQ.idx);
       var _this = this;
       /* eslint-disable no-console */
 
       // for test
       var formBody = this.createReqGenerateQSampleFormBody(detectionQ);
       // real..
-      //var formBody = this.createReqDetectQFormBody(this.generations[i]);
+      //var formBody = this.createReqGenerateQFormBody(this.generations[i]);
       return new Promise((resolve, reject) => {
         _this
           .$generation({
@@ -312,17 +331,15 @@ export default {
           })
           .then(result => {
             this.generationQs.push({
-              objective: _this.objective,
+              objective: detectionQ.selectQ.objective,
               generationHml: result.data,
-              generationHtml: { html_list: [] },
-              idx: detectionQ.idx
+              generationHtml: { html_list: [] }
             }); // html 결과만 제외하고 모두 담는다.
 
             resolve({
-              objective: _this.objective,
+              objective: detectionQ.selectQ.objective,
               generationHml: result.data,
-              generationHtml: { html_list: [] },
-              idx: detectionQ.idx
+              generationHtml: { html_list: [] }
             });
             //console.log(_this.generations);
 
@@ -371,6 +388,7 @@ export default {
       });
     },
     displayGenerationQs() {
+      //console.log(this.generationQs);
       this.$EventBus.$emit("generatedQuestions", this.generationQs);
     },
     createReqDetectQFormBody(selectQ) {
@@ -378,27 +396,27 @@ export default {
 
       form.append("service_id", "");
       form.append("etc_service_id", "");
-      form.append("category1", selectQ.category1);
-      form.append("category2", selectQ.category2);
-      form.append("category3", selectQ.category3);
-      form.append("category4", selectQ.category4);
-      form.append("category5", selectQ.category5);
-      form.append("chapter_code", selectQ.chapterCode);
-      form.append("etc_category1", selectQ.etcCategory1);
-      form.append("etc_category2", selectQ.etcCategory2);
-      form.append("etc_category3", selectQ.etcCategory3);
-      form.append("etc_category4", selectQ.etcCategory4);
-      form.append("etc_category5", selectQ.etcCategory5);
+      form.append("category1", selectQ.content.category1);
+      form.append("category2", selectQ.content.category2);
+      form.append("category3", selectQ.content.category3);
+      form.append("category4", selectQ.content.category4);
+      form.append("category5", selectQ.content.category5);
+      form.append("chapter_code", selectQ.content.chapterCode);
+      form.append("etc_category1", selectQ.content.etcCategory1);
+      form.append("etc_category2", selectQ.content.etcCategory2);
+      form.append("etc_category3", selectQ.content.etcCategory3);
+      form.append("etc_category4", selectQ.content.etcCategory4);
+      form.append("etc_category5", selectQ.content.etcCategory5);
       form.append("etc_chapter_code", "");
-      form.append("question_id", selectQ.qsno);
+      form.append("question_id", selectQ.content.qsno);
       form.append("subject_cd", "");
       form.append("subject_cd_value", "");
       form.append("body_title_html", "");
-      form.append("body_html", selectQ.bodyhtml);
-      form.append("body_ex_html", selectQ.bodyext);
-      form.append("list_html", selectQ.listhtml);
-      form.append("answer_html", selectQ.answerhtml);
-      form.append("explanation_html", selectQ.bodyext);
+      form.append("body_html", selectQ.content.bodyhtml);
+      form.append("body_ex_html", selectQ.content.bodyext);
+      form.append("list_html", selectQ.content.listhtml);
+      form.append("answer_html", selectQ.content.answerhtml);
+      form.append("explanation_html", selectQ.content.bodyext);
       form.append("hint_html", "");
       form.append("help1_html", "");
       form.append("help2_html", "");
@@ -416,7 +434,7 @@ export default {
       form.append("studytree_id", "");
       form.append("studytree_name", "");
       form.append("question_type_cd", "");
-      form.append("question_type_cd_value", selectQ.questionType);
+      form.append("question_type_cd_value", selectQ.content.questionType);
       form.append("f_choice_shape_cd", "");
       form.append("f_choice_shape_cd_value", "");
       form.append("f_test_yn", "");
@@ -540,14 +558,14 @@ export default {
       form.append("category3", "");
       form.append("category4", "");
       form.append("category5", "");
-      form.append("chapter_code", detectionQ.selectQ.chapterCode);
-      form.append("etc_category1", detectionQ.selectQ.etcCategory1);
-      form.append("etc_category2", detectionQ.selectQ.etcCategory2);
-      form.append("etc_category3", detectionQ.selectQ.etcCategory3);
-      form.append("etc_category4", detectionQ.selectQ.etcCategory4);
-      form.append("etc_category5", detectionQ.selectQ.etcCategory5);
+      form.append("chapter_code", detectionQ.selectQ.content.chapterCode);
+      form.append("etc_category1", detectionQ.selectQ.content.etcCategory1);
+      form.append("etc_category2", detectionQ.selectQ.content.etcCategory2);
+      form.append("etc_category3", detectionQ.selectQ.content.etcCategory3);
+      form.append("etc_category4", detectionQ.selectQ.content.etcCategory4);
+      form.append("etc_category5", detectionQ.selectQ.content.etcCategory5);
       form.append("etc_chapter_code", "");
-      form.append("question_id", detectionQ.selectQ.qsno);
+      form.append("question_id", detectionQ.selectQ.content.qsno);
       form.append("subject_cd", "");
       form.append("subject_cd_value", "");
       form.append("body_title_html", "");
@@ -580,7 +598,7 @@ export default {
       form.append("f_usage_cd", "");
       form.append("f_usage_cd_value", "");
       form.append("difficulty_cd", "");
-      form.append("difficulty_cd_value", detectionQ.selectQ.defficulty);
+      form.append("difficulty_cd_value", detectionQ.selectQ.content.defficulty);
       form.append("f_weight_yn", "");
       form.append("f_book_cd", "");
       form.append("f_book_cd_value", "");
@@ -622,7 +640,7 @@ export default {
       form.append("etc_category4", "소수와 합성수");
       form.append("etc_category5", "");
       form.append("etc_chapter_code", "");
-      form.append("question_id", detection.selectQ.qsno);
+      form.append("question_id", detection.selectQ.content.qsno);
       form.append("subject_cd", "");
       form.append("subject_cd_value", "");
       form.append("body_title_html", "");
@@ -702,6 +720,12 @@ export default {
 
       return new Blob([ia], {
         type: mimeString
+      });
+    },
+    sortFunc(obj) {
+      console.log(obj);
+      return obj.objective.slice().sort(function(a, b) {
+        return a.lbno > b.lbno ? -1 : 1;
       });
     }
   }

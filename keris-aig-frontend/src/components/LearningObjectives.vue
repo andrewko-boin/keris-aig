@@ -13,11 +13,11 @@
         style="max-width:250px"
       ></v-select>
     </v-card-title>
-    <v-list shaped dense height="278" style="overflow-y:auto">
-      <v-list-item-group v-model="selectedObj" active-class="primary--text">
+    <v-list shaped dense height="350px" style="overflow-y:auto">
+      <v-list-item-group multiple v-model="selectedObjs" active-class="primary--text">
         <template v-if="learning_objectives.length">
           <template v-for="(objective, index) in learning_objectives">
-            <v-list-item :key="objective.lbno" @click="searchQuestionPreviewList(objective)">
+            <v-list-item :key="objective.lbno" :value="objective">
               <template v-slot:default="{ active, toggle }">
                 <v-list-item-content style="max-width:50px">
                   <v-list-item-title v-text="objective.lbno"></v-list-item-title>
@@ -53,7 +53,7 @@ export default {
   data() {
     return {
       search: "",
-      selectedObj: null,
+      selectedObjs: [],
       selgradeunit: [],
       learning_objectives: [],
       gradeunits: ["선택"]
@@ -92,6 +92,8 @@ export default {
           "학년/학기/차시 선택을 한 후 돋보기 버튼을 클릭하여 검색하세요!"
         );
       } else {
+        // Issue: 한참 찾았다 ㅜㅜ 검색 버튼 클릭할 때 같은 데이터가 있으면 선택된 채로 남기 때문에 미리보기에서 또 추가되는 것 같다... 아예 검색 시점에 초기화해서 해결
+        this.learning_objectives = [];
         this.$axios
           .get("/api/v1/kerisaig/query/learningobjective/" + this.selgradeunit)
           .then(response => {
@@ -101,20 +103,14 @@ export default {
             this.learning_objectives = response.data.content;
           });
       }
-    },
-    searchQuestionPreviewList(objective) {
-      /* eslint-disable no-console */
-      //console.log(this.selectedObj);
-
-      this.$EventBus.$emit("queryQuestionPreviewList", objective);
     }
   },
-  computed: {
-    msg() {
-      const selectedRow = this.selected[0];
-      return selectedRow
-        ? `${selectedRow.no} ${selectedRow.objectives}`
-        : "no data selected";
+  watch: {
+    selectedObjs: function(objectives) {
+      //do something when the data changes.
+      if (objectives) {
+        this.$EventBus.$emit("queryQuestionPreviewList", objectives);
+      }
     }
   }
 };

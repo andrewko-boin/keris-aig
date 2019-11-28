@@ -19,7 +19,7 @@
       </v-btn>
     </v-card-title>
 
-    <v-list dense max-height="300" style="overflow-y:auto">
+    <v-list dense max-height="400" style="overflow-y:auto">
       <template v-if="generatedQhtmls.length">
         <v-list-item-group>
           <template v-for="(generatedQhtml, index) in generatedQhtmls">
@@ -29,7 +29,7 @@
                   <v-list-item-title v-text="index+1"></v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-content style="max-width:200px">
-                  <v-list-item-title v-text="objective.lesson"></v-list-item-title>
+                  <v-list-item-title v-text="generatedQhtml.objective.lesson"></v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-content>
                   <v-row>
@@ -47,7 +47,7 @@
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setGeneratedQuestion('bodyhtml', index, generatedQhtml.body_html)"
+                          @load="setGeneratedQuestion('bodyhtml', index, generatedQhtml.html.body_html)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -65,7 +65,7 @@
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setGeneratedQuestion('listhtml', index, generatedQhtml.list_html)"
+                          @load="setGeneratedQuestion('listhtml', index, generatedQhtml.html.list_html)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -120,8 +120,8 @@ export default {
       var zip = new JsZip(); // **ReferenceError: JSZip is not defined**
       var uri, idx, content;
 
-      console.log("downloadHmlFiles");
-      console.log(this.generatedQhmls[0]);
+      //console.log("downloadHmlFiles");
+      //console.log(this.generatedQhmls[0]);
 
       if (this.generatedQhmls.length == 0) {
         this.$EventBus.$emit(
@@ -143,7 +143,7 @@ export default {
       });
     },
     displayGeneratedQuestions(generationQs) {
-      console.log(generationQs);
+      //console.log(generationQs);
 
       if (generationQs == 0) {
         this.$EventBus.$emit(
@@ -152,7 +152,8 @@ export default {
         );
         return;
       } else {
-        this.objective = generationQs[0].objective;
+        // 멀티 선택으로 변경..
+        //this.objective = generationQs[0].objective;
         //console.log(generationQs);
         for (var i = 0; i < generationQs.length; i++) {
           if (generationQs[i].generationHtml.html_list.length == 0) {
@@ -169,9 +170,10 @@ export default {
               h++
             ) {
               //console.log(generationQs[i].generationHtml.html_list[h].d[0]);
-              this.generatedQhtmls.push(
-                generationQs[i].generationHtml.html_list[h].d[0]
-              );
+              this.generatedQhtmls.push({
+                objective: generationQs[i].objective,
+                html: generationQs[i].generationHtml.html_list[h].d[0]
+              });
 
               this.generatedQhmls.push(
                 generationQs[i].generationHml.hml_list[h].hml //base64
@@ -179,6 +181,7 @@ export default {
             }
           }
         }
+        //console.log(this.generatedQhtmls);
       }
     },
     setGeneratedQuestion(ref, index, html) {

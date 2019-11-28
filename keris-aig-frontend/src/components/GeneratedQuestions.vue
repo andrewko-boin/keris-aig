@@ -10,7 +10,7 @@
         :loading="loading"
         :disabled="loading"
         color="primary"
-        @click="saveHml"
+        @click="downloadHmlFiles"
       >
         저장
         <template v-slot:loader>
@@ -95,7 +95,8 @@ export default {
     return {
       loading: false,
       objective: null,
-      generatedQhtmls: []
+      generatedQhtmls: [],
+      generatedQhmls: []
     };
   },
   created() {
@@ -106,24 +107,33 @@ export default {
         //console.log(generationQs);
 
         this.generatedQhtmls.length = 0;
+        this.generatedQhmls.length = 0;
         this.displayGeneratedQuestions(generationQs);
       }.bind(this) // EventBus에서는 Event 안에 this는 자신이 된다. 따라서 바인딩할때 이와 같이 처리해줘야 한다.
     );
   },
   methods: {
-    saveHml() {
-      console.log("saveHml");
+    downloadHmlFiles() {
+      console.log("downloadHmlFiles");
     },
     displayGeneratedQuestions(generationQs) {
-      if (generationQs.length == 0) {
-        alert("generationQs.length == 0");
+      console.log(generationQs);
+
+      if (generationQs == 0) {
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "보여줄 생성 문항이 없습니다.! 관리자에게 문의하세요."
+        );
         return;
       } else {
         this.objective = generationQs[0].objective;
         //console.log(generationQs);
         for (var i = 0; i < generationQs.length; i++) {
           if (generationQs[i].generationHtml.html_list.length == 0) {
-            alert("generationQs[i].generationHtml.html_list.length == 0");
+            this.$EventBus.$emit(
+              "popAlertMessageToHome",
+              "HTML로 변환된 생성 문항이 없습니다! 관리자에게 문의하세요."
+            );
             return;
           } else {
             //console.log(JSON.stringify(generationQs[i]));
@@ -136,6 +146,10 @@ export default {
               this.generatedQhtmls.push(
                 generationQs[i].generationHtml.html_list[h].d[0]
               );
+
+              this.generatedQhmls.push(
+                generationQs[i].generationHml.hml_list[h].hml[0] //base64
+              );
             }
           }
         }
@@ -145,7 +159,7 @@ export default {
       //console.log(html);
 
       //console.log(ref + "/" + index + ":" + html);
-      console.log(document.getElementById(ref + index));
+      //console.log(document.getElementById(ref + index));
       setTimeout(function() {
         document.getElementById(ref + index).contentWindow.setHtml(html);
         //this.$refs[ref + q.qsno].contentWindow.setHtml(q.bodyhtml);

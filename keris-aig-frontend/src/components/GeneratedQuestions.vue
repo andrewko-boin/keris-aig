@@ -90,6 +90,9 @@
   </v-card>
 </template>
 <script>
+import JsZip from "jszip";
+import saveAs from "file-saver";
+
 export default {
   data() {
     return {
@@ -114,7 +117,30 @@ export default {
   },
   methods: {
     downloadHmlFiles() {
+      var zip = new JsZip(); // **ReferenceError: JSZip is not defined**
+      var uri, idx, content;
+
       console.log("downloadHmlFiles");
+      console.log(this.generatedQhmls[0]);
+
+      if (this.generatedQhmls.length == 0) {
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "다운로드 받을 hml 파일이 존재하지 않습니다! 관리자에게 문의하세요."
+        );
+        return;
+      } else {
+        for (var i = 0; i < this.generatedQhmls.length; i++) {
+          uri = "data:binary;base64," + this.generatedQhmls[i];
+          idx = uri.indexOf("base64,") + "base64,".length; // or = 28 if you're sure about the prefix
+          content = uri.substring(idx);
+          zip.file("question-" + i + ".hwp", content, { base64: true });
+        }
+      }
+
+      zip.generateAsync({ type: "blob" }).then(function(blob) {
+        saveAs(blob, "questions.zip");
+      });
     },
     displayGeneratedQuestions(generationQs) {
       console.log(generationQs);
@@ -148,7 +174,7 @@ export default {
               );
 
               this.generatedQhmls.push(
-                generationQs[i].generationHml.hml_list[h].hml[0] //base64
+                generationQs[i].generationHml.hml_list[h].hml //base64
               );
             }
           }

@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title style="padding: 16px 16px 1px 16px;">
+    <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
       <v-icon class="mr-2">mdi-teach</v-icon>학습 목표
       <v-spacer></v-spacer>
       <v-select
@@ -14,7 +14,7 @@
       ></v-select>
     </v-card-title>
     <v-list shaped dense height="250px" style="overflow-y:auto">
-      <v-list-item-group multiple v-model="selectedObjs" active-class="primary--text">
+      <v-list-item-group multiple v-model="selectedObjs" active-class="brown lighten-5">
         <template v-if="learning_objectives.length">
           <template v-for="(objective, index) in learning_objectives">
             <v-list-item :key="objective.lbno" :value="objective">
@@ -27,7 +27,7 @@
                 </v-list-item-content>
                 <v-list-item-action style="max-width:50px">
                   <!-- list에서 로우 클릭 시 체크박스가 체크되려면 v-model을 반드시 active로 해줘야 한다.-->
-                  <v-checkbox v-model="active" color="primary"></v-checkbox>
+                  <v-checkbox v-model="active" color="brown darken-4"></v-checkbox>
                 </v-list-item-action>
               </template>
             </v-list-item>

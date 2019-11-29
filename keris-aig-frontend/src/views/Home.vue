@@ -45,13 +45,19 @@
         @keydown="progressDialog = false"
       >
         <v-card>
-          <v-col class="subtitle-1 text-center" cols="12" v-text="progressMessage"></v-col>
+          <v-col class="subtitle-1 text-center" cols="12">문항 생성중...</v-col>
           <v-col cols="12">
-            <v-progress-linear indeterminate rounded height="6"></v-progress-linear>
+            <v-progress-linear indeterminate rounded height="6" color="lime darken-4"></v-progress-linear>
           </v-col>
+          <v-col class="subtitle-1 text-center" cols="12">생성 개수에 따라 시간이 소요될 수 있습니다.</v-col>
         </v-card>
       </v-dialog>
     </v-row>
+
+    <v-snackbar v-model="snackbar" :multi-line="multiLine" color="brown lighten-2" right bottom>
+      {{ alertMessage }}
+      <v-btn color="white" text @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -72,7 +78,9 @@ export default {
       alertDialog: false,
       alertMessage: null,
       progressDialog: false,
-      progressMessage: "Generating..."
+      progressMessage: "문항 생성중...",
+      multiLine: true,
+      snackbar: false
     };
   },
   created() {
@@ -89,6 +97,13 @@ export default {
         this.popProgressBar(progressMessage, isStart);
       }.bind(this)
     );
+
+    this.$EventBus.$on(
+      "generaionSnackBarToHome",
+      function(alertMessage) {
+        this.generaionSnackBar(alertMessage);
+      }.bind(this)
+    );
   },
   methods: {
     popAlertMessage(alertMessage) {
@@ -98,6 +113,10 @@ export default {
     popProgressBar(progressMessage, isStart) {
       this.progressDialog = isStart;
       this.progressMessage = progressMessage;
+    },
+    generaionSnackBar(alertMessage) {
+      this.alertMessage = alertMessage;
+      this.snackbar = true;
     }
   }
 };

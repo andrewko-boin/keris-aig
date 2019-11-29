@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title style="padding: 16px 16px 1px 16px;">
+    <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
       <v-icon class="mr-2">mdi-view-agenda-outline</v-icon>문항 미리보기 목록
       <v-spacer></v-spacer>
       <v-select
@@ -28,7 +28,7 @@
     </v-card-title>
     <v-list dense height="237px" style="overflow-y:auto">
       <template v-if="prevQuestions.length">
-        <v-list-item-group multiple v-model="selectQs" active-class="primary--text">
+        <v-list-item-group multiple v-model="selectQs" active-class="brown lighten-5">
           <template v-for="(q, index) in prevQuestions">
             <v-list-item :key="q.content.qsno" :value="q">
               <template v-slot:default="{ active, toggle }">
@@ -77,7 +77,7 @@
                 </v-list-item-content>
                 <v-list-item-action style="max-width:50px">
                   <!-- list에서 로우 클릭 시 체크박스가 체크되려면 v-model을 반드시 active로 해줘야 한다.-->
-                  <v-checkbox v-model="active" color="primary" @click="toggle"></v-checkbox>
+                  <v-checkbox v-model="active" color="brown darken-4" @click="toggle"></v-checkbox>
                 </v-list-item-action>
               </template>
             </v-list-item>

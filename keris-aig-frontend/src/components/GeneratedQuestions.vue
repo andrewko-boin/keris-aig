@@ -1,7 +1,7 @@
 <template>
   <v-card class="mx-auto" style="padding-bottom:1px">
     <v-responsive :aspect-ratio="20/3">
-      <v-card-title style="padding: 16px 16px 1px 16px;">
+      <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
         <v-icon class="mr-2">mdi-playlist-plus</v-icon>생성 문항 리스트
         <v-spacer></v-spacer>
         <v-btn
@@ -127,6 +127,7 @@ export default {
       //console.log("downloadHmlFiles");
       //console.log(this.generatedQhmls[0]);
 
+      let downloadedCount = 0;
       if (this.generatedQhmls.length == 0) {
         this.$EventBus.$emit(
           "popAlertMessageToHome",
@@ -139,12 +140,19 @@ export default {
           idx = uri.indexOf("base64,") + "base64,".length; // or = 28 if you're sure about the prefix
           content = uri.substring(idx);
           zip.file("question-" + i + ".hwp", content, { base64: true });
+          downloadedCount++;
         }
       }
 
       zip.generateAsync({ type: "blob" }).then(function(blob) {
         saveAs(blob, "questions.zip");
       });
+
+      this.$EventBus.$emit(
+        "generaionSnackBarToHome",
+        downloadedCount +
+          "개의 hwp 파일이 포함된 zip파일이 다운로드 되었습니다."
+      );
     },
     displayGeneratedQuestions(generationQs) {
       //console.log(generationQs);
@@ -159,6 +167,7 @@ export default {
         // 멀티 선택으로 변경..
         //this.objective = generationQs[0].objective;
         //console.log(generationQs);
+        let generatedCount = 0;
         for (var i = 0; i < generationQs.length; i++) {
           if (generationQs[i].generationHtml.html_list.length == 0) {
             this.$EventBus.$emit(
@@ -182,10 +191,15 @@ export default {
               this.generatedQhmls.push(
                 generationQs[i].generationHml.hml_list[h].hml //base64
               );
+
+              generatedCount++;
             }
           }
         }
-        console.log(this.generatedQhtmls);
+        this.$EventBus.$emit(
+          "generaionSnackBarToHome",
+          generatedCount + "개의 문항이 성공적으로 생성되었습니다."
+        );
       }
     },
     setGeneratedQuestion(ref, index, html) {

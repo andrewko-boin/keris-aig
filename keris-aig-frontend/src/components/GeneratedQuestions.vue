@@ -1,6 +1,6 @@
 <template>
   <v-card class="mx-auto" style="padding-bottom:1px">
-    <v-responsive :aspect-ratio="16/3">
+    <v-responsive :aspect-ratio="20/3">
       <v-card-title style="padding: 16px 16px 1px 16px;">
         <v-icon class="mr-2">mdi-playlist-plus</v-icon>생성 문항 리스트
         <v-spacer></v-spacer>
@@ -21,7 +21,7 @@
         </v-btn>
       </v-card-title>
 
-      <v-list dense style="overflow-y:auto" :height="h" class="mt-1">
+      <v-list dense style="overflow-y:auto" class="mt-1">
         <template v-if="generatedQhtmls.length">
           <v-list-item-group>
             <template v-for="(generatedQhtml, index) in generatedQhtmls">

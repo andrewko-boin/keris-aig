@@ -31,7 +31,7 @@
                 </v-list-item-action>
               </template>
             </v-list-item>
-            <v-divider v-if="index + 1 < learning_objectives.length" :key="index"></v-divider>
+            <v-divider v-if="index + 1 < learning_objectives.length" :key="'divider'+index"></v-divider>
           </template>
         </template>
         <template v-else>
@@ -109,7 +109,6 @@ export default {
     selectedObjs: function(objectives) {
       //do something when the data changes.
       if (objectives) {
-        console.log(objectives);
         this.$EventBus.$emit("queryQuestionPreviewList", objectives);
       }
     }

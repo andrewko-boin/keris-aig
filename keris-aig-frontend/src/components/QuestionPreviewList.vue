@@ -46,12 +46,12 @@
                           </v-list-item-content>
                         </v-list-item>
                         <iframe
-                          v-bind:id="'bodyhtml' + q.content.qsno"
+                          v-bind:id="'qp_bodyhtml' + q.content.qsno"
                           src="../../question_view.html"
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setPrevQuestion('bodyhtml', q.content)"
+                          @load="setPrevQuestion('qp_bodyhtml', q.content)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -64,12 +64,12 @@
                           </v-list-item-content>
                         </v-list-item>
                         <iframe
-                          v-bind:id="'listhtml' + q.content.qsno"
+                          v-bind:id="'qp_listhtml' + q.content.qsno"
                           src="../../question_view.html"
                           height="100px"
                           width="100%"
                           frameborder="0"
-                          @load="setPrevQuestion('listhtml', q.content)"
+                          @load="setPrevQuestion('qp_listhtml', q.content)"
                         ></iframe>
                       </v-card>
                     </v-col>
@@ -81,7 +81,7 @@
                 </v-list-item-action>
               </template>
             </v-list-item>
-            <v-divider v-if="index + 1 < prevQuestions.length" :key="index"></v-divider>
+            <v-divider v-if="index + 1 < prevQuestions.length" :key="'divider'+index"></v-divider>
           </template>
         </v-list-item-group>
       </template>
@@ -170,11 +170,11 @@ export default {
 
       //console.log(this.$refs[ref + q.qsno]);
       setTimeout(function() {
-        if (ref == "bodyhtml")
+        if (ref == "qp_bodyhtml")
           document
             .getElementById(ref + q.qsno)
             .contentWindow.setHtml(q.bodyhtml);
-        else if (ref == "listhtml")
+        else if (ref == "qp_listhtml")
           document
             .getElementById(ref + q.qsno)
             .contentWindow.setHtml(q.listhtml);

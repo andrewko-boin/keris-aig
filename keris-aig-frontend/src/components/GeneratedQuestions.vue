@@ -44,12 +44,12 @@
                             </v-list-item-content>
                           </v-list-item>
                           <iframe
-                            v-bind:id="'bodyhtml' + index"
+                            v-bind:id="'gq_bodyhtml' + index"
                             src="../../question_view.html"
                             height="100px"
                             width="100%"
                             frameborder="0"
-                            @load="setGeneratedQuestion('bodyhtml', index, generatedQhtml.html.body_html)"
+                            @load="setGeneratedQuestion('gq_bodyhtml', index, generatedQhtml.html.body_html)"
                           ></iframe>
                         </v-card>
                       </v-col>
@@ -67,7 +67,7 @@
                             height="100px"
                             width="100%"
                             frameborder="0"
-                            @load="setGeneratedQuestion('listhtml', index, generatedQhtml.html.list_html)"
+                            @load="setGeneratedQuestion('gq_listhtml', index, generatedQhtml.html.list_html)"
                           ></iframe>
                         </v-card>
                       </v-col>
@@ -75,7 +75,7 @@
                   </v-list-item-content>
                 </template>
               </v-list-item>
-              <v-divider v-if="index + 1 < generatedQhtmls.length" :key="index"></v-divider>
+              <v-divider v-if="index + 1 < generatedQhtmls.length" :key="'divider'+index"></v-divider>
             </template>
           </v-list-item-group>
         </template>
@@ -185,18 +185,18 @@ export default {
             }
           }
         }
-        //console.log(this.generatedQhtmls);
+        console.log(this.generatedQhtmls);
       }
     },
     setGeneratedQuestion(ref, index, html) {
-      //console.log(html);
-
       //console.log(ref + "/" + index + ":" + html);
+
       //console.log(document.getElementById(ref + index));
       setTimeout(function() {
-        document.getElementById(ref + index).contentWindow.setHtml(html);
+        if (document.getElementById(ref + index))
+          document.getElementById(ref + index).contentWindow.setHtml(html);
         //this.$refs[ref + q.qsno].contentWindow.setHtml(q.bodyhtml);
-      }, 100);
+      }, 500);
     }
   }
 };

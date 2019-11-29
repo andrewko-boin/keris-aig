@@ -1,6 +1,6 @@
 <template>
   <v-card class="mx-auto">
-    <v-card-title>
+    <v-card-title style="padding: 16px 16px 1px 16px;">
       생성 문항 리스트
       <v-spacer></v-spacer>
       <v-btn
@@ -19,7 +19,7 @@
       </v-btn>
     </v-card-title>
 
-    <v-list dense max-height="400" style="overflow-y:auto">
+    <v-list dense max-height="400" class="mt-1" style="overflow-y:auto">
       <template v-if="generatedQhtmls.length">
         <v-list-item-group>
           <template v-for="(generatedQhtml, index) in generatedQhtmls">
@@ -31,7 +31,7 @@
                 <v-list-item-content style="max-width:200px">
                   <v-list-item-title v-text="generatedQhtml.objective.lesson"></v-list-item-title>
                 </v-list-item-content>
-                <v-list-item-content>
+                <v-list-item-content style="padding-top: 0px;padding-bottom: 0px">
                   <v-row>
                     <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
                       <v-card raised class="mx-auto ml-1">

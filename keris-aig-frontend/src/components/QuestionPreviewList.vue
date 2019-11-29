@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>
+    <v-card-title style="padding: 16px 16px 1px 16px;">
       문항 미리보기 목록
       <v-spacer></v-spacer>
       <v-select
@@ -31,10 +31,10 @@
           <template v-for="(q, index) in prevQuestions">
             <v-list-item :key="q.content.qsno" :value="q">
               <template v-slot:default="{ active, toggle }">
-                <v-list-item-content style="max-width:50px">
+                <v-list-item-content style="max-width:80px">
                   <v-list-item-title v-text="q.content.lbno +'-' +q.content.qsno"></v-list-item-title>
                 </v-list-item-content>
-                <v-list-item-content>
+                <v-list-item-content style="padding-top: 0px;padding-bottom: 0px">
                   <v-row>
                     <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
                       <v-card raised class="mx-auto ml-1">

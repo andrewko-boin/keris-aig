@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>
+    <v-card-title style="padding: 16px 16px 1px 16px;">
       학습 목표
       <v-spacer></v-spacer>
       <v-select

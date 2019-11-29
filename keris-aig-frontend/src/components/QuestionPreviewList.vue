@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title style="padding: 16px 16px 1px 16px;">
-      문항 미리보기 목록
+      <v-icon class="mr-2">mdi-view-agenda-outline</v-icon>문항 미리보기 목록
       <v-spacer></v-spacer>
       <v-select
         v-model="selcount"
@@ -16,7 +16,8 @@
         rounded
         :loading="loading"
         :disabled="loading"
-        color="primary"
+        outlined
+        color="indigo"
         @click="detectAndGenQuestion"
       >
         생성
@@ -25,7 +26,7 @@
         </template>
       </v-btn>
     </v-card-title>
-    <v-list dense height="337" style="overflow-y:auto">
+    <v-list dense height="237px" style="overflow-y:auto">
       <template v-if="prevQuestions.length">
         <v-list-item-group multiple v-model="selectQs" active-class="primary--text">
           <template v-for="(q, index) in prevQuestions">
@@ -39,7 +40,7 @@
                     <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
                       <v-card raised class="mx-auto ml-1">
                         <v-list-item>
-                          <v-list-item-avatar color="grey" size="20"></v-list-item-avatar>
+                          <v-icon class="mr-2">mdi-file-question-outline</v-icon>
                           <v-list-item-content>
                             <v-list-item-title class="subtitle-1 font-weight-bold">문항 내용</v-list-item-title>
                           </v-list-item-content>
@@ -57,7 +58,7 @@
                     <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
                       <v-card raised class="mx-auto mr-1">
                         <v-list-item>
-                          <v-list-item-avatar color="grey" size="20"></v-list-item-avatar>
+                          <v-icon class="mr-2">mdi-adchoices</v-icon>
                           <v-list-item-content>
                             <v-list-item-title class="subtitle-1 font-weight-bold">선택지</v-list-item-title>
                           </v-list-item-content>
@@ -80,7 +81,7 @@
                 </v-list-item-action>
               </template>
             </v-list-item>
-            <v-divider v-if="index + 1 < q.length" :key="index"></v-divider>
+            <v-divider v-if="index + 1 < prevQuestions.length" :key="index"></v-divider>
           </template>
         </v-list-item-group>
       </template>

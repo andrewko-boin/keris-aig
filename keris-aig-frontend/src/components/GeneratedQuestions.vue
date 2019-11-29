@@ -1,92 +1,95 @@
 <template>
-  <v-card class="mx-auto">
-    <v-card-title style="padding: 16px 16px 1px 16px;">
-      생성 문항 리스트
-      <v-spacer></v-spacer>
-      <v-btn
-        class="ma-2"
-        large
-        rounded
-        :loading="loading"
-        :disabled="loading"
-        color="primary"
-        @click="downloadHmlFiles"
-      >
-        저장
-        <template v-slot:loader>
-          <span style="font-size:xx-small">Loading..</span>
-        </template>
-      </v-btn>
-    </v-card-title>
+  <v-card class="mx-auto" style="padding-bottom:1px">
+    <v-responsive :aspect-ratio="16/3">
+      <v-card-title style="padding: 16px 16px 1px 16px;">
+        <v-icon class="mr-2">mdi-playlist-plus</v-icon>생성 문항 리스트
+        <v-spacer></v-spacer>
+        <v-btn
+          class="ma-2"
+          large
+          rounded
+          :loading="loading"
+          :disabled="loading"
+          outlined
+          color="indigo"
+          @click="downloadHmlFiles"
+        >
+          저장
+          <template v-slot:loader>
+            <span style="font-size:xx-small">Loading..</span>
+          </template>
+        </v-btn>
+      </v-card-title>
 
-    <v-list dense max-height="400" class="mt-1" style="overflow-y:auto">
-      <template v-if="generatedQhtmls.length">
-        <v-list-item-group>
-          <template v-for="(generatedQhtml, index) in generatedQhtmls">
-            <v-list-item :key="'l_' + index">
-              <template>
-                <v-list-item-content style="max-width:70px">
-                  <v-list-item-title v-text="index+1"></v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-content style="max-width:200px">
-                  <v-list-item-title v-text="generatedQhtml.objective.lesson"></v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-content style="padding-top: 0px;padding-bottom: 0px">
-                  <v-row>
-                    <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
-                      <v-card raised class="mx-auto ml-1">
-                        <v-list-item>
-                          <v-list-item-avatar color="grey" size="20"></v-list-item-avatar>
-                          <v-list-item-content>
-                            <v-list-item-title class="subtitle-1 font-weight-bold">문항 내용</v-list-item-title>
-                          </v-list-item-content>
-                        </v-list-item>
-                        <iframe
-                          v-bind:id="'bodyhtml' + index"
-                          src="../../question_view.html"
-                          height="100px"
-                          width="100%"
-                          frameborder="0"
-                          @load="setGeneratedQuestion('bodyhtml', index, generatedQhtml.html.body_html)"
-                        ></iframe>
-                      </v-card>
-                    </v-col>
-                    <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
-                      <v-card raised class="mx-auto mr-1">
-                        <v-list-item>
-                          <v-list-item-avatar color="grey" size="20"></v-list-item-avatar>
-                          <v-list-item-content>
-                            <v-list-item-title class="subtitle-1 font-weight-bold">선택지</v-list-item-title>
-                          </v-list-item-content>
-                        </v-list-item>
-                        <iframe
-                          v-bind:id="'listhtml' + index"
-                          src="../../question_view.html"
-                          height="100px"
-                          width="100%"
-                          frameborder="0"
-                          @load="setGeneratedQuestion('listhtml', index, generatedQhtml.html.list_html)"
-                        ></iframe>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </v-list-item-content>
-              </template>
-            </v-list-item>
-            <v-divider v-if="index + 1 < generatedQhtmls.length" :key="index"></v-divider>
-          </template>
-        </v-list-item-group>
-      </template>
-      <template v-else>
-        <v-list-item>
-          <template>
-            <v-list-item-content>
-              <v-list-item-title>No data found!</v-list-item-title>
-            </v-list-item-content>
-          </template>
-        </v-list-item>
-      </template>
-    </v-list>
+      <v-list dense style="overflow-y:auto" :height="h" class="mt-1">
+        <template v-if="generatedQhtmls.length">
+          <v-list-item-group>
+            <template v-for="(generatedQhtml, index) in generatedQhtmls">
+              <v-list-item :key="'l_' + index">
+                <template>
+                  <v-list-item-content style="max-width:70px">
+                    <v-list-item-title v-text="index+1"></v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-content style="max-width:200px">
+                    <v-list-item-title v-text="generatedQhtml.objective.lesson"></v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-content style="padding-top: 0px;padding-bottom: 0px">
+                    <v-row>
+                      <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
+                        <v-card raised class="mx-auto ml-1">
+                          <v-list-item>
+                            <v-icon class="mr-2">mdi-file-question-outline</v-icon>
+                            <v-list-item-content>
+                              <v-list-item-title class="subtitle-1 font-weight-bold">문항 내용</v-list-item-title>
+                            </v-list-item-content>
+                          </v-list-item>
+                          <iframe
+                            v-bind:id="'bodyhtml' + index"
+                            src="../../question_view.html"
+                            height="100px"
+                            width="100%"
+                            frameborder="0"
+                            @load="setGeneratedQuestion('bodyhtml', index, generatedQhtml.html.body_html)"
+                          ></iframe>
+                        </v-card>
+                      </v-col>
+                      <v-col cols="6" xs="6" sm="6" md="6" lg="6" xl="6">
+                        <v-card raised class="mx-auto mr-1">
+                          <v-list-item>
+                            <v-icon class="mr-2">mdi-adchoices</v-icon>
+                            <v-list-item-content>
+                              <v-list-item-title class="subtitle-1 font-weight-bold">선택지</v-list-item-title>
+                            </v-list-item-content>
+                          </v-list-item>
+                          <iframe
+                            v-bind:id="'listhtml' + index"
+                            src="../../question_view.html"
+                            height="100px"
+                            width="100%"
+                            frameborder="0"
+                            @load="setGeneratedQuestion('listhtml', index, generatedQhtml.html.list_html)"
+                          ></iframe>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                  </v-list-item-content>
+                </template>
+              </v-list-item>
+              <v-divider v-if="index + 1 < generatedQhtmls.length" :key="index"></v-divider>
+            </template>
+          </v-list-item-group>
+        </template>
+        <template v-else>
+          <v-list-item>
+            <template>
+              <v-list-item-content>
+                <v-list-item-title>No data found!</v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </v-list-item>
+        </template>
+      </v-list>
+    </v-responsive>
   </v-card>
 </template>
 <script>
@@ -99,7 +102,8 @@ export default {
       loading: false,
       objective: null,
       generatedQhtmls: [],
-      generatedQhmls: []
+      generatedQhmls: [],
+      h: window.innerHeight - 595
     };
   },
   created() {

@@ -13,14 +13,16 @@ axios.defaults.headers.get["Content-Type"] = "application/json";
 // Axios에서 DefaultURL 외에 여러개 URL등록할 때 이런식으로 사용....
 // 호출할때는 this.$detection...
 const detection = axios.create({
-  baseURL: 'http://221.163.201.60:11975',
+  //baseURL: 'http://221.163.201.60:11975',
+  baseURL: 'http://221.163.201.60:11715',
   headers: {
     'Content-Type': 'multipart/form-data'
   }
 });
 
 const generation = axios.create({
-  baseURL: 'http://221.163.201.60:11976',
+  //baseURL: 'http://221.163.201.60:11976',
+  baseURL: 'http://221.163.201.60:11716',
   headers: {
     'Content-Type': 'multipart/form-data'
   }

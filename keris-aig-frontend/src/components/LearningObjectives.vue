@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title style="padding: 16px 16px 1px 16px;">
-      학습 목표
+      <v-icon class="mr-2">mdi-teach</v-icon>학습 목표
       <v-spacer></v-spacer>
       <v-select
         v-model="selgradeunit"
@@ -13,7 +13,7 @@
         style="max-width:250px"
       ></v-select>
     </v-card-title>
-    <v-list shaped dense height="350px" style="overflow-y:auto">
+    <v-list shaped dense height="250px" style="overflow-y:auto">
       <v-list-item-group multiple v-model="selectedObjs" active-class="primary--text">
         <template v-if="learning_objectives.length">
           <template v-for="(objective, index) in learning_objectives">
@@ -27,11 +27,11 @@
                 </v-list-item-content>
                 <v-list-item-action style="max-width:50px">
                   <!-- list에서 로우 클릭 시 체크박스가 체크되려면 v-model을 반드시 active로 해줘야 한다.-->
-                  <v-checkbox v-model="active" color="primary" @click="toggle"></v-checkbox>
+                  <v-checkbox v-model="active" color="primary"></v-checkbox>
                 </v-list-item-action>
               </template>
             </v-list-item>
-            <v-divider v-if="index + 1 < objective.length" :key="index"></v-divider>
+            <v-divider v-if="index + 1 < learning_objectives.length" :key="index"></v-divider>
           </template>
         </template>
         <template v-else>
@@ -109,6 +109,7 @@ export default {
     selectedObjs: function(objectives) {
       //do something when the data changes.
       if (objectives) {
+        console.log(objectives);
         this.$EventBus.$emit("queryQuestionPreviewList", objectives);
       }
     }

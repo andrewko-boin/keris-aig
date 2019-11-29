@@ -14,6 +14,6 @@
     </div>
     <v-spacer></v-spacer>
 
-    <span class="mr-2">Automatic Math Question Generation</span>
+    <span class="mr-2 headline font-weight-thin">Automatic Math Question Generation</span>
   </v-app-bar>
 </template>

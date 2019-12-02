@@ -289,9 +289,9 @@ export default {
 
       return new Promise((resolve, reject) => {
         // for test
-        var formBody = _this.createReqDetectQSampleFormBody();
+        //var formBody = _this.createReqDetectQSampleFormBody();
         // real..
-        //var formBody = this.createReqDetectQFormBody(selectQ);
+        var formBody = this.createReqDetectQFormBody(selectQ);
         // 문항 디텍트
 
         _this
@@ -319,9 +319,9 @@ export default {
       /* eslint-disable no-console */
 
       // for test
-      var formBody = this.createReqGenerateQSampleFormBody(detectionQ);
+      //var formBody = this.createReqGenerateQSampleFormBody(detectionQ);
       // real..
-      //var formBody = this.createReqGenerateQFormBody(this.generations[i]);
+      var formBody = this.createReqGenerateQFormBody(detectionQ);
       return new Promise((resolve, reject) => {
         _this
           .$generation({
@@ -385,6 +385,7 @@ export default {
           .catch(function(response) {
             //handle error
             console.log(response);
+            reject(response);
           });
       });
     },
@@ -623,7 +624,7 @@ export default {
 
       return form;
     },
-    createReqGenerateQFormBody(detection) {
+    createReqGenerateQFormBody(detectionQ) {
       let form = new FormData();
 
       form.append("request_count", this.selcount);
@@ -634,14 +635,14 @@ export default {
       form.append("category3", "");
       form.append("category4", "");
       form.append("category5", "");
-      form.append("chapter_code", "MA1507A01010102");
-      form.append("etc_category1", "중학교 1학년 / 1학기");
-      form.append("etc_category2", "소인수분해");
-      form.append("etc_category3", "소인수분해");
-      form.append("etc_category4", "소수와 합성수");
-      form.append("etc_category5", "");
+      form.append("chapter_code", detectionQ.selectQ.content.chapterCode);
+      form.append("etc_category1", detectionQ.selectQ.content.etcCategory1);
+      form.append("etc_category2", detectionQ.selectQ.content.etcCategory2);
+      form.append("etc_category3", detectionQ.selectQ.content.etcCategory3);
+      form.append("etc_category4", detectionQ.selectQ.content.etcCategory4);
+      form.append("etc_category5", detectionQ.selectQ.content.etcCategory5);
       form.append("etc_chapter_code", "");
-      form.append("question_id", detection.selectQ.content.qsno);
+      form.append("question_id", detectionQ.selectQ.content.qsno);
       form.append("subject_cd", "");
       form.append("subject_cd_value", "");
       form.append("body_title_html", "");
@@ -674,7 +675,7 @@ export default {
       form.append("f_usage_cd", "");
       form.append("f_usage_cd_value", "");
       form.append("difficulty_cd", "");
-      form.append("difficulty_cd_value", "중");
+      form.append("difficulty_cd_value", detectionQ.selectQ.content.defficulty);
       form.append("f_weight_yn", "");
       form.append("f_book_cd", "");
       form.append("f_book_cd_value", "");
@@ -694,7 +695,7 @@ export default {
       form.append("f_etc_txt03", "");
       form.append("f_etc_txt04", "");
       form.append("f_etc_txt05", "");
-      form.append("model", JSON.stringify(detection.detectionModel));
+      form.append("model", JSON.stringify(detectionQ.detectionModel));
 
       return form;
     },

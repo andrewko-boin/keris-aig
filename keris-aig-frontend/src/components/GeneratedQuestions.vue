@@ -83,7 +83,7 @@
           <v-list-item>
             <template>
               <v-list-item-content>
-                <v-list-item-title>No data found!</v-list-item-title>
+                <v-list-item-title v-text="generatingMsg"></v-list-item-title>
               </v-list-item-content>
             </template>
           </v-list-item>
@@ -103,6 +103,7 @@ export default {
       objective: null,
       generatedQhtmls: [],
       generatedQhmls: [],
+      generatingMsg: "No data found!",
       h: window.innerHeight - 595
     };
   },
@@ -111,11 +112,17 @@ export default {
       "generatedQuestions",
       function(generationQs) {
         /* eslint-disable no-console */
-        //console.log(generationQs);
 
-        this.generatedQhtmls.length = 0;
-        this.generatedQhmls.length = 0;
-        this.displayGeneratedQuestions(generationQs);
+        if (this.generatedQhtmls.length > 0) this.generatedQhtmls = []; // 모든 미리보기 항목을 초기화 한다.
+        if (this.generatedQhmls.length > 0) this.generatedQhmls = []; // 모든 선택 항목을 초기화 한다.
+        this.generatingMsg = "Generating...";
+
+        setTimeout(
+          function() {
+            this.displayGeneratedQuestions(generationQs);
+          }.bind(this),
+          100
+        );
       }.bind(this) // EventBus에서는 Event 안에 this는 자신이 된다. 따라서 바인딩할때 이와 같이 처리해줘야 한다.
     );
   },
@@ -157,7 +164,7 @@ export default {
     displayGeneratedQuestions(generationQs) {
       //console.log(generationQs);
 
-      if (generationQs == 0) {
+      if (generationQs.length == 0) {
         this.$EventBus.$emit(
           "popAlertMessageToHome",
           "보여줄 생성 문항이 없습니다.! 관리자에게 문의하세요."
@@ -167,6 +174,7 @@ export default {
         // 멀티 선택으로 변경..
         //this.objective = generationQs[0].objective;
         //console.log(generationQs);
+
         let generatedCount = 0;
         for (var i = 0; i < generationQs.length; i++) {
           if (generationQs[i].generationHtml.html_list.length == 0) {
@@ -196,6 +204,9 @@ export default {
             }
           }
         }
+
+        this.generatingMsg = "No data found!";
+
         this.$EventBus.$emit(
           "generaionSnackBarToHome",
           generatedCount + "개의 문항이 성공적으로 생성되었습니다."
@@ -210,7 +221,7 @@ export default {
         if (document.getElementById(ref + index))
           document.getElementById(ref + index).contentWindow.setHtml(html);
         //this.$refs[ref + q.qsno].contentWindow.setHtml(q.bodyhtml);
-      }, 500);
+      }, 100);
     }
   }
 };

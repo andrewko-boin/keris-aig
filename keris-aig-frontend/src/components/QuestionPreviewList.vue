@@ -382,10 +382,10 @@ export default {
 
             resolve(result.data);
           })
-          .catch(function(response) {
+          .catch(function(error) {
             //handle error
-            console.log(response);
-            reject(response);
+            console.log(error);
+            reject(error);
           });
       });
     },

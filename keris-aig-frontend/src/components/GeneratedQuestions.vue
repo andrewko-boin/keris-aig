@@ -191,10 +191,12 @@ export default {
               h++
             ) {
               //console.log(generationQs[i].generationHtml.html_list[h].d[0]);
-              this.generatedQhtmls.push({
-                objective: generationQs[i].objective,
-                html: generationQs[i].generationHtml.html_list[h].d[0]
-              });
+
+              // 임시로 주석, 나중에 주석 해제
+              // this.generatedQhtmls.push({
+              //   objective: generationQs[i].objective,
+              //   html: generationQs[i].generationHtml.html_list[h].d[0]
+              // });
 
               this.generatedQhmls.push(
                 generationQs[i].generationHml.hml_list[h].hml //base64

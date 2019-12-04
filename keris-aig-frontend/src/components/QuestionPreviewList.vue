@@ -385,6 +385,10 @@ export default {
           .catch(function(error) {
             //handle error
             console.log(error);
+
+            // 일단 추가, 나중에 삭제
+            resolve("<div></div>");
+            // 일단 제거, 나중에 다시 주석 해제
             reject(error);
           });
       });

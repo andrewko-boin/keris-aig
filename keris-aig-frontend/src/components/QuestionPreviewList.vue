@@ -359,17 +359,19 @@ export default {
 
       //console.log(this.generationQs);
       return new Promise((resolve, reject) => {
-        var blob = this.dataURItoBlob(
-          "data:binary;charset=UTF-8;base64," + hml
-        );
+        // var blob = this.dataURItoBlob(
+        //   "data:binary;charset=UTF-8;base64," + hml
+        // );
 
         let form = new FormData();
-        form.append("file", blob, "hml.hml");
+        //form.append("file", blob, "hml.hml");
+        form.append("hml", hml);
 
         _this
           .$iscream({
             method: "post",
-            url: "/cms_api/questions_preview",
+            //url: "/cms_api/questions_preview",
+            url: "/hml2html",
             data: form,
             headers: { "Content-Type": "multipart/form-data" }
           })
@@ -387,7 +389,7 @@ export default {
             console.log(error);
 
             // 일단 추가, 나중에 삭제
-            resolve("<div></div>");
+            // resolve("<div></div>");
             // 일단 제거, 나중에 다시 주석 해제
             reject(error);
           });

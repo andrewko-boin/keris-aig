@@ -29,7 +29,8 @@ const generation = axios.create({
 });
 
 const iscream = axios.create({
-  baseURL: 'http://cms.aimath.home-learn.com',
+  //baseURL: 'http://cms.aimath.home-learn.com',
+  baseURL: 'http://61.74.183.29:11720',
   headers: {
     'Content-Type': 'multipart/form-data'
   }

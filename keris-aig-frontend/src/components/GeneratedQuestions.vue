@@ -12,9 +12,24 @@
           :disabled="loading"
           outlined
           color="indigo"
-          @click="downloadHmlFiles"
+          @click="downloadMergedHmlFiles"
         >
-          저장
+          하나의 HML 파일로 다운로드
+          <template v-slot:loader>
+            <span style="font-size:xx-small">Loading..</span>
+          </template>
+        </v-btn>
+        <v-btn
+          class="ma-2"
+          large
+          rounded
+          :loading="loading"
+          :disabled="loading"
+          outlined
+          color="indigo"
+          @click="downloadIndividualHmlFiles"
+        >
+          개별 HML 파일로 다운로드
           <template v-slot:loader>
             <span style="font-size:xx-small">Loading..</span>
           </template>
@@ -127,7 +142,7 @@ export default {
     );
   },
   methods: {
-    downloadHmlFiles() {
+    downloadIndividualHmlFiles() {
       var zip = new JsZip(); // **ReferenceError: JSZip is not defined**
       var uri, idx, content;
 
@@ -138,7 +153,7 @@ export default {
       if (this.generatedQhmls.length == 0) {
         this.$EventBus.$emit(
           "popAlertMessageToHome",
-          "다운로드 받을 hml 파일이 존재하지 않습니다! 관리자에게 문의하세요."
+          "문항 생성을 먼저 진행해 주세요."
         );
         return;
       } else {
@@ -160,6 +175,202 @@ export default {
         downloadedCount +
           "개의 hwp 파일이 포함된 zip파일이 다운로드 되었습니다."
       );
+    },
+    downloadMergedHmlFiles() {
+      if (this.generatedQhmls.length == 0) {
+        this.$EventBus.$emit(
+          "popAlertMessageToHome",
+          "문항 생성을 먼저 진행해 주세요."
+        );
+        return;
+      } else {
+        var zip = new JsZip(); // **ReferenceError: JSZip is not defined**
+        var templateQuestionsHmlDoc,
+          templateQuestionsHml,
+          templateAnswersHmlDoc,
+          //templateAnswersHml,
+          decodedTexthml,
+          decodedHmlDoc,
+          questionSectionNode,
+          answerSectionNode,
+          sectionPnodeSnapshots,
+          sectionPnode;
+        var parser = new DOMParser();
+        var q_index = 0; //모든 hml for loop 밖에 둔다.
+        var sectionMode; //q: 문제/선택지, a: 답/해설 i: 문항정보 이후
+        let downloadedCount = 0;
+
+        // read sample hml
+        // this.$local.get("../hml/hml_sample.hml").then(response => {
+        //   decodedHmlDoc = parser.parseFromString(response.data, "text/xml");
+        // });
+
+        // read template hml
+        this.$local.get("../hml/template.hml").then(response => {
+          // console.log(template_hml);
+
+          templateQuestionsHmlDoc = parser.parseFromString(
+            response.data,
+            "text/xml"
+          );
+
+          templateAnswersHmlDoc = parser.parseFromString(
+            response.data,
+            "text/xml"
+          );
+
+          for (var i = 0; i < this.generatedQhmls.length; i++) {
+            decodedTexthml = this.$base64.decode(this.generatedQhmls[i]); // DECODING
+            decodedHmlDoc = parser.parseFromString(decodedTexthml, "text/xml");
+
+            if (decodedHmlDoc.evaluate) {
+              sectionPnodeSnapshots = decodedHmlDoc.evaluate(
+                "/HWPML/BODY/SECTION/P",
+                decodedHmlDoc.cloneNode(true),
+                null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+              );
+
+              for (var j = 0; j < sectionPnodeSnapshots.snapshotLength; j++) {
+                //모든 P노드에 대한 Iterator를 가져온다.
+                sectionPnode = sectionPnodeSnapshots.snapshotItem(j);
+
+                if (
+                  sectionPnode.getElementsByTagName("CHAR").length &&
+                  sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                    .nodeValue == "(문제)"
+                ) {
+                  sectionMode = "q";
+                  questionSectionNode = templateQuestionsHmlDoc.createElement(
+                    "SECTION"
+                  );
+                  questionSectionNode.setAttribute("ID", q_index);
+                  sectionPnode.getElementsByTagName(
+                    "CHAR"
+                  )[0].childNodes[0].nodeValue =
+                    "(" + (q_index + 1) + "번 문제)";
+                  questionSectionNode.appendChild(sectionPnode);
+                } else if (
+                  sectionPnode.getElementsByTagName("CHAR").length &&
+                  sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                    .nodeValue == "(답)"
+                ) {
+                  sectionMode = "a";
+                  answerSectionNode = templateAnswersHmlDoc.createElement(
+                    "SECTION"
+                  );
+                  answerSectionNode.setAttribute("ID", q_index);
+                  sectionPnode.getElementsByTagName(
+                    "CHAR"
+                  )[0].childNodes[0].nodeValue = "(" + (q_index + 1) + "번 답)";
+                  answerSectionNode.appendChild(sectionPnode);
+                } else if (
+                  sectionPnode.getElementsByTagName("CHAR").length &&
+                  (sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                    .nodeValue == "(문항정보)" ||
+                    sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                      .nodeValue == "(난이도)" ||
+                    sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                      .nodeValue == "(행동영역)" ||
+                    sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                      .nodeValue == "(내용영역)" ||
+                    sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                      .nodeValue == "(단원코드)")
+                ) {
+                  sectionMode = "i";
+                } else {
+                  if (sectionMode == "q") {
+                    questionSectionNode.appendChild(sectionPnode);
+                  } else if (sectionMode == "a") {
+                    answerSectionNode.appendChild(sectionPnode);
+                  } else {
+                    if (sectionPnode.getElementsByTagName("CHAR").length) {
+                      console.log(
+                        sectionPnode.getElementsByTagName("CHAR")[0].firstChild
+                          .nodeValue + " is skiped..."
+                      );
+                    } else {
+                      console.log("NOT EXIST CHAR NODE....");
+                    }
+                  }
+                }
+              }
+
+              q_index++;
+
+              console.log(questionSectionNode);
+              // console.log(answerSectionNode);  // (답) 부분은 API 부분 수정이 필요함.
+
+              templateQuestionsHmlDoc
+                .getElementsByTagName("BODY")[0]
+                .appendChild(questionSectionNode);
+
+              // templateAnswersHmlDoc
+              //   .getElementsByTagName("BODY")[0]
+              //   .appendChild(answerSectionNode);
+
+              // console.log(templateQuestionsHmlDoc);
+              // console.log(templateAnswersHmlDoc);
+            }
+          }
+
+          //code for IE
+          if (window.ActiveXObject) {
+            templateQuestionsHml = this.$base64.encode(
+              templateQuestionsHmlDoc.xml
+            );
+
+            // templateAnswersHml = this.$base64.encode(
+            //   templateAnswersHmlDoc.xml
+            // );
+          }
+          // code for Chrome, Safari, Firefox, Opera, etc.
+          else {
+            templateQuestionsHml = this.$base64.encode(
+              new XMLSerializer().serializeToString(templateQuestionsHmlDoc)
+            );
+
+            // templateAnswersHml = this.$base64.encode(
+            //   new XMLSerializer().serializeToString(templateAnswersHmlDoc)
+            // );
+          }
+
+          //console.log(templateQuestionsHml);
+          //console.log(templateAnswersHml);
+
+          downloadedCount++;
+
+          zip.file(
+            "questions.hwp",
+            ("data:binary;base64," + templateQuestionsHml).substring(
+              ("data:binary;base64," + templateQuestionsHml).indexOf(
+                "base64,"
+              ) + "base64,".length
+            ),
+            { base64: true }
+          );
+
+          zip.file(
+            "answers.hwp",
+            ("data:binary;base64," + templateQuestionsHml).substring(
+              ("data:binary;base64," + templateQuestionsHml).indexOf(
+                "base64,"
+              ) + "base64,".length
+            ),
+            { base64: true }
+          );
+
+          zip.generateAsync({ type: "blob" }).then(function(blob) {
+            saveAs(blob, "questions&answers.zip");
+          });
+
+          this.$EventBus.$emit(
+            "generaionSnackBarToHome",
+            downloadedCount + "파일이 다운로드 되었습니다."
+          );
+        });
+      }
     },
     displayGeneratedQuestions(generationQs) {
       //console.log(generationQs);

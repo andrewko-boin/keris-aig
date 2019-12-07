@@ -26,7 +26,7 @@
         </template>
       </v-btn>
     </v-card-title>
-    <v-list dense height="237px" style="overflow-y:auto">
+    <v-list dense height="350px" style="overflow-y:auto">
       <template v-if="prevQuestions.length">
         <v-list-item-group multiple v-model="selectQs" active-class="brown lighten-5">
           <template v-for="(q, index) in prevQuestions">

@@ -14,11 +14,12 @@
           color="indigo"
           @click="downloadMergedHmlFiles"
         >
-          하나의 HML 파일로 다운로드
+          생성 문항 저장
           <template v-slot:loader>
             <span style="font-size:xx-small">Loading..</span>
           </template>
         </v-btn>
+        <!--
         <v-btn
           class="ma-2"
           large
@@ -34,6 +35,7 @@
             <span style="font-size:xx-small">Loading..</span>
           </template>
         </v-btn>
+        -->
       </v-card-title>
 
       <v-list dense style="overflow-y:auto" class="mt-1">
@@ -188,7 +190,7 @@ export default {
         var templateQuestionsHmlDoc,
           templateQuestionsHml,
           templateAnswersHmlDoc,
-          //templateAnswersHml,
+          templateAnswersHml,
           decodedTexthml,
           decodedHmlDoc,
           questionSectionNode,
@@ -300,15 +302,15 @@ export default {
               q_index++;
 
               console.log(questionSectionNode);
-              // console.log(answerSectionNode);  // (답) 부분은 API 부분 수정이 필요함.
+              console.log(answerSectionNode); // (답) 부분은 API 부분 수정이 필요함.
 
               templateQuestionsHmlDoc
                 .getElementsByTagName("BODY")[0]
                 .appendChild(questionSectionNode);
 
-              // templateAnswersHmlDoc
-              //   .getElementsByTagName("BODY")[0]
-              //   .appendChild(answerSectionNode);
+              templateAnswersHmlDoc
+                .getElementsByTagName("BODY")[0]
+                .appendChild(answerSectionNode);
 
               // console.log(templateQuestionsHmlDoc);
               // console.log(templateAnswersHmlDoc);
@@ -321,9 +323,7 @@ export default {
               templateQuestionsHmlDoc.xml
             );
 
-            // templateAnswersHml = this.$base64.encode(
-            //   templateAnswersHmlDoc.xml
-            // );
+            templateAnswersHml = this.$base64.encode(templateAnswersHmlDoc.xml);
           }
           // code for Chrome, Safari, Firefox, Opera, etc.
           else {
@@ -331,9 +331,9 @@ export default {
               new XMLSerializer().serializeToString(templateQuestionsHmlDoc)
             );
 
-            // templateAnswersHml = this.$base64.encode(
-            //   new XMLSerializer().serializeToString(templateAnswersHmlDoc)
-            // );
+            templateAnswersHml = this.$base64.encode(
+              new XMLSerializer().serializeToString(templateAnswersHmlDoc)
+            );
           }
 
           //console.log(templateQuestionsHml);
@@ -342,7 +342,7 @@ export default {
           downloadedCount++;
 
           zip.file(
-            "questions.hwp",
+            "시험지.hwp",
             ("data:binary;base64," + templateQuestionsHml).substring(
               ("data:binary;base64," + templateQuestionsHml).indexOf(
                 "base64,"
@@ -352,17 +352,16 @@ export default {
           );
 
           zip.file(
-            "answers.hwp",
-            ("data:binary;base64," + templateQuestionsHml).substring(
-              ("data:binary;base64," + templateQuestionsHml).indexOf(
-                "base64,"
-              ) + "base64,".length
+            "해설지.hwp",
+            ("data:binary;base64," + templateAnswersHml).substring(
+              ("data:binary;base64," + templateAnswersHml).indexOf("base64,") +
+                "base64,".length
             ),
             { base64: true }
           );
 
           zip.generateAsync({ type: "blob" }).then(function(blob) {
-            saveAs(blob, "questions&answers.zip");
+            saveAs(blob, "문제집.zip");
           });
 
           this.$EventBus.$emit(

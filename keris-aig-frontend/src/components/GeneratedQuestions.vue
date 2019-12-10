@@ -211,20 +211,24 @@ export default {
         this.$local.get("../hml/template.hml").then(response => {
           // console.log(template_hml);
 
+          console.log("111");
           templateQuestionsHmlDoc = parser.parseFromString(
             response.data,
             "text/xml"
           );
-
+          console.log(templateQuestionsHmlDoc);
           templateAnswersHmlDoc = parser.parseFromString(
             response.data,
             "text/xml"
           );
-
+          console.log("222");
           for (var i = 0; i < this.generatedQhmls.length; i++) {
             decodedTexthml = this.$base64.decode(this.generatedQhmls[i]); // DECODING
+            console.log(decodedTexthml);
             decodedHmlDoc = parser.parseFromString(decodedTexthml, "text/xml");
-
+            console.log(decodedHmlDoc);
+            console.log("333");
+            console.log(decodedHmlDoc.evaluate);
             if (decodedHmlDoc.evaluate) {
               sectionPnodeSnapshots = decodedHmlDoc.evaluate(
                 "/HWPML/BODY/SECTION/P",
@@ -301,8 +305,8 @@ export default {
 
               q_index++;
 
-              console.log(questionSectionNode);
-              console.log(answerSectionNode); // (답) 부분은 API 부분 수정이 필요함.
+              //console.log(questionSectionNode);
+              //console.log(answerSectionNode); // (답) 부분은 API 부분 수정이 필요함.
 
               templateQuestionsHmlDoc
                 .getElementsByTagName("BODY")[0]
@@ -314,6 +318,11 @@ export default {
 
               // console.log(templateQuestionsHmlDoc);
               // console.log(templateAnswersHmlDoc);
+            } else {
+              console.log("444");
+              var nodes = decodedHmlDoc.selectNodes("/HWPML/BODY/SECTION/P");
+              console.log("nodes");
+              console.log(nodes);
             }
           }
 

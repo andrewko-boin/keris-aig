@@ -227,11 +227,13 @@ export default {
             console.log(decodedTexthml);
 
             if (window.DOMParser) {
+              console.log("window.DOMParser");
               decodedHmlDoc = parser.parseFromString(
                 decodedTexthml,
                 "text/xml"
               );
             } else {
+              console.log("Microsoft.XMLDOM");
               decodedHmlDoc = new ActiveXObject("Microsoft.XMLDOM");
               decodedHmlDoc.async = false;
               decodedHmlDoc.loadXML(decodedTexthml);

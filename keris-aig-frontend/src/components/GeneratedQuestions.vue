@@ -225,7 +225,18 @@ export default {
           for (var i = 0; i < this.generatedQhmls.length; i++) {
             decodedTexthml = this.$base64.decode(this.generatedQhmls[i]); // DECODING
             console.log(decodedTexthml);
-            decodedHmlDoc = parser.parseFromString(decodedTexthml, "text/xml");
+
+            if (window.DOMParser) {
+              decodedHmlDoc = parser.parseFromString(
+                decodedTexthml,
+                "text/xml"
+              );
+            } else {
+              decodedHmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+              decodedHmlDoc.async = false;
+              decodedHmlDoc.loadXML(decodedTexthml);
+            }
+
             console.log(decodedHmlDoc);
             console.log("333");
             console.log(decodedHmlDoc.evaluate);

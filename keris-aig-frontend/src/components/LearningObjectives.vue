@@ -3,11 +3,12 @@
     <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
       <v-icon class="mr-2">mdi-teach</v-icon>학습 목표
       <v-spacer></v-spacer>
+      <span class="title">STEP 1</span>
       <v-select
+        class="pl-3"
         v-model="selgradeunit"
         :items="gradeunits"
         append-outer-icon="search"
-        hide-details
         label="선택"
         @click:append-outer="searchGradeUnits"
         style="max-width:250px"
@@ -38,7 +39,7 @@
           <v-list-item>
             <template>
               <v-list-item-content>
-                <v-list-item-title>No data found!</v-list-item-title>
+                <v-list-item-title class="subtitle-1">학습목표를 선택해주세요.</v-list-item-title>
               </v-list-item-content>
             </template>
           </v-list-item>

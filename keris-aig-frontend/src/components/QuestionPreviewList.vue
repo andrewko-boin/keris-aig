@@ -3,10 +3,11 @@
     <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
       <v-icon class="mr-2">mdi-view-agenda-outline</v-icon>문항 미리보기 목록
       <v-spacer></v-spacer>
+      <span class="title">STEP 2</span>
       <v-select
+        class="pl-3"
         v-model="selcount"
         :items="qcount"
-        hide-details
         label="문항당 생성개수"
         style="max-width:150px"
       ></v-select>
@@ -89,7 +90,7 @@
         <v-list-item>
           <template>
             <v-list-item-content>
-              <v-list-item-title>No data found!</v-list-item-title>
+              <v-list-item-title class="subtitle-1">생성 할 문항을 선택해주세요.</v-list-item-title>
             </v-list-item-content>
           </template>
         </v-list-item>

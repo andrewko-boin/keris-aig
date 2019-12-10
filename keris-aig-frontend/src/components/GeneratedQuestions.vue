@@ -4,6 +4,7 @@
       <v-card-title style="padding: 16px 16px 1px 16px;" class="font-weight-black">
         <v-icon class="mr-2">mdi-playlist-plus</v-icon>생성 문항 리스트
         <v-spacer></v-spacer>
+        <span class="title">STEP 3</span>
         <v-btn
           class="ma-2"
           large
@@ -14,7 +15,7 @@
           color="indigo"
           @click="downloadMergedHmlFiles"
         >
-          생성 문항 저장
+          문항 다운로드
           <template v-slot:loader>
             <span style="font-size:xx-small">Loading..</span>
           </template>
@@ -100,7 +101,7 @@
           <v-list-item>
             <template>
               <v-list-item-content>
-                <v-list-item-title v-text="generatingMsg"></v-list-item-title>
+                <v-list-item-title class="subtitle-1" v-text="generatingMsg"></v-list-item-title>
               </v-list-item-content>
             </template>
           </v-list-item>
@@ -120,7 +121,7 @@ export default {
       objective: null,
       generatedQhtmls: [],
       generatedQhmls: [],
-      generatingMsg: "No data found!",
+      generatingMsg: "생성 문항을 다운로드 해주세요.",
       h: window.innerHeight - 595
     };
   },
@@ -440,7 +441,7 @@ export default {
           }
         }
 
-        this.generatingMsg = "No data found!";
+        this.generatingMsg = "생성 문항을 다운로드 해주세요.";
 
         this.$EventBus.$emit(
           "generaionSnackBarToHome",
